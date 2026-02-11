@@ -23,6 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             id INT AUTO_INCREMENT PRIMARY KEY,
             email VARCHAR(255) NOT NULL UNIQUE,
             password VARCHAR(255) NOT NULL,
+            reset_token VARCHAR(100) NULL,
+            reset_expires DATETIME NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
 
@@ -94,11 +96,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             fb_url VARCHAR(255),
             tw_url VARCHAR(255),
             ig_url VARCHAR(255),
-            yt_url VARCHAR(255)
+            yt_url VARCHAR(255),
+            fb_access_token TEXT,
+            tw_api_key VARCHAR(255),
+            tw_api_secret VARCHAR(255),
+            li_access_token TEXT,
+            meta_access_token TEXT
         )");
-
-        // Add reset token fields to users
-        $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(100) NULL, ADD COLUMN IF NOT EXISTS reset_expires DATETIME NULL");
 
         // Seed Categories
         $categories = ['EPL', 'UCL', 'Transfers', 'Chelsea', 'Arsenal', 'Liverpool', 'Man City', 'Fixtures', 'Table', 'Top Scorers'];
