@@ -17,7 +17,11 @@ function is_admin_logged_in() {
  */
 function require_admin_login() {
     if (!is_admin_logged_in()) {
-        header("Location: /admin/login");
+        $base = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+        // Handle root or migrate subfolder
+        if (substr($base, -8) === '/migrate') $base = substr($base, 0, -8);
+
+        header("Location: " . $base . "/admin/login");
         exit;
     }
 }

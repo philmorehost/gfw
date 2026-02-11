@@ -124,8 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="text-center mb-5">
-    <h2 className="display-6 font-condensed fw-black italic text-white text-uppercase">Stage 2: Intelligence Base</h2>
-    <p className="text-muted text-uppercase fw-bold ls-widest" style="font-size: 10px;">Database configuration and schema injection</p>
+    <h2 class="display-6 font-condensed fw-black italic text-white text-uppercase">Stage 2: Intelligence Base</h2>
+    <p class="text-muted text-uppercase fw-bold ls-widest" style="font-size: 10px;">Database configuration and schema injection</p>
 </div>
 
 <?php if ($success): ?>

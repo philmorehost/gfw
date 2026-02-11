@@ -123,11 +123,11 @@ include __DIR__ . '/../includes/header.php';
                     </div>
                 <?php endif; ?>
 
-                <article class="mb-5">
-                    <p class="lead fw-bold italic text-white mb-5 pb-4 border-bottom border-white border-opacity-10 fs-3">
+                <article class="mb-5 shadow-2xl p-4 p-md-5 bg-white/5 rounded-3 border border-white/5">
+                    <p class="lead fw-bold italic text-white mb-5 pb-5 border-bottom border-white border-opacity-10 fs-3 lh-base">
                         "<?php echo e($post['excerpt']); ?>"
                     </p>
-                    <div class="text-white-50 lh-lg fs-5" style="white-space: pre-wrap;">
+                    <div class="text-gray-300 fs-5" style="white-space: pre-wrap; line-height: 1.8; letter-spacing: 0.01em;">
                         <?php echo nl2br(e($post['content'])); ?>
                     </div>
                 </article>

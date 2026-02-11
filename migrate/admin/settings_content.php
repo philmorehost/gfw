@@ -90,6 +90,30 @@
                     <span class="text-sm font-bold uppercase text-gray-500">YouTube URL</span>
                     <input type="text" name="yt_url" class="mt-1 block w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white" value="<?php echo e($settings['yt_url']); ?>">
                 </label>
+
+                <div class="col-span-full mt-4">
+                    <h3 class="text-xs font-black text-[#ff3e3e] uppercase tracking-widest border-bottom border-white border-opacity-5 pb-2 mb-4">Autopost API Keys</h3>
+                </div>
+                <label class="block">
+                    <span class="text-sm font-bold uppercase text-gray-500">Facebook Access Token</span>
+                    <input type="text" name="fb_access_token" class="mt-1 block w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white" value="<?php echo e($settings['fb_access_token']); ?>">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-bold uppercase text-gray-500">Twitter API Key</span>
+                    <input type="text" name="tw_api_key" class="mt-1 block w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white" value="<?php echo e($settings['tw_api_key']); ?>">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-bold uppercase text-gray-500">Twitter API Secret</span>
+                    <input type="password" name="tw_api_secret" class="mt-1 block w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white" value="<?php echo e($settings['tw_api_secret']); ?>">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-bold uppercase text-gray-500">LinkedIn Access Token</span>
+                    <input type="text" name="li_access_token" class="mt-1 block w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white" value="<?php echo e($settings['li_access_token']); ?>">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-bold uppercase text-gray-500">Meta/Insta Access Token</span>
+                    <input type="text" name="meta_access_token" class="mt-1 block w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white" value="<?php echo e($settings['meta_access_token']); ?>">
+                </label>
             </div>
 
             <div class="pt-6 border-t border-white/5 flex justify-end">

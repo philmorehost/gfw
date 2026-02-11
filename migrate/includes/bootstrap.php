@@ -10,6 +10,7 @@ require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/mail.php';
 require_once __DIR__ . '/api_cache.php';
+require_once __DIR__ . '/social.php';
 
 // Check if config exists for DB connection
 $pdo = null;

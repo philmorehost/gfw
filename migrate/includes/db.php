@@ -109,4 +109,14 @@ function run_migrations($pdo) {
             ADD COLUMN api_url VARCHAR(255) DEFAULT 'https://v3.football.api-sports.io',
             ADD COLUMN api_header VARCHAR(255) DEFAULT 'x-apisports-key'");
     }
+
+    $stmt = $pdo->query("SHOW COLUMNS FROM settings LIKE 'fb_access_token'");
+    if ($stmt->rowCount() == 0) {
+        $pdo->exec("ALTER TABLE settings
+            ADD COLUMN fb_access_token TEXT,
+            ADD COLUMN tw_api_key VARCHAR(255),
+            ADD COLUMN tw_api_secret VARCHAR(255),
+            ADD COLUMN li_access_token TEXT,
+            ADD COLUMN meta_access_token TEXT");
+    }
 }

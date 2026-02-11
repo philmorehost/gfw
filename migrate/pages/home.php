@@ -49,7 +49,7 @@ include __DIR__ . '/../includes/header.php';
                 <div id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-inner rounded-3 overflow-hidden shadow-2xl">
                         <?php foreach ($featured_posts as $index => $post): ?>
-                            <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?> group cursor-pointer" onclick="location.href='/post/<?php echo $post['id']; ?>'">
+                            <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?> group cursor-pointer" onclick="location.href='/<?php echo $post['slug']; ?>'">
                                 <div class="ratio ratio-16x9 overflow-hidden">
                                     <img src="<?php echo e($post['image']); ?>" class="object-cover transition-transform duration-700 group-hover:scale-110" alt="<?php echo e($post['title']); ?>">
                                 </div>
@@ -70,7 +70,7 @@ include __DIR__ . '/../includes/header.php';
             <h2 class="h4 font-condensed fw-black italic text-white border-bottom border-electric-red border-4 d-inline-block pb-1 mb-4">Latest Intelligence</h2>
             <div class="row g-4">
                 <?php foreach ($latest_posts as $post): ?>
-                    <div class="col-md-6 group cursor-pointer" onclick="location.href='/post/<?php echo $post['id']; ?>'">
+                    <div class="col-md-6 group cursor-pointer" onclick="location.href='/<?php echo $post['slug']; ?>'">
                         <div class="card h-100 border-0 bg-transparent">
                             <div class="ratio ratio-16x9 rounded-3 overflow-hidden mb-3">
                                 <img src="<?php echo e($post['image']); ?>" class="object-cover transition-transform duration-500 group-hover:scale-105" alt="">
@@ -116,7 +116,7 @@ include __DIR__ . '/../includes/header.php';
             <h2 class="h4 font-condensed fw-black italic text-white border-bottom border-electric-red border-4 d-inline-block pb-1 mb-4">Transfer Intelligence</h2>
             <div class="row g-3">
                 <?php foreach ($transfer_posts as $post): ?>
-                    <div class="col-md-3 group cursor-pointer" onclick="location.href='/post/<?php echo $post['id']; ?>'">
+                    <div class="col-md-3 group cursor-pointer" onclick="location.href='/<?php echo $post['slug']; ?>'">
                         <div class="ratio ratio-1x1 rounded-3 overflow-hidden mb-2">
                             <img src="<?php echo e($post['image']); ?>" class="object-cover transition-transform group-hover:scale-110" alt="">
                         </div>

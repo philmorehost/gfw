@@ -30,8 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ig = $_POST['ig_url'];
         $yt = $_POST['yt_url'];
 
-        $stmt = $pdo->prepare("UPDATE settings SET name=?, tagline=?, logo=?, whatsapp_number=?, admin_email=?, smtp_sender=?, smtp_host=?, smtp_port=?, smtp_user=?, smtp_pass=?, smtp_encryption=?, fb_url=?, tw_url=?, ig_url=?, yt_url=? WHERE id=1");
-        $stmt->execute([$name, $tagline, $logo, $whatsapp, $admin_email, $smtp_sender, $smtp_host, $smtp_port, $smtp_user, $smtp_pass, $smtp_encryption, $fb, $tw, $ig, $yt]);
+        $fb_token = $_POST['fb_access_token'];
+        $tw_key = $_POST['tw_api_key'];
+        $tw_secret = $_POST['tw_api_secret'];
+        $li_token = $_POST['li_access_token'];
+        $meta_token = $_POST['meta_access_token'];
+
+        $stmt = $pdo->prepare("UPDATE settings SET name=?, tagline=?, logo=?, whatsapp_number=?, admin_email=?, smtp_sender=?, smtp_host=?, smtp_port=?, smtp_user=?, smtp_pass=?, smtp_encryption=?, fb_url=?, tw_url=?, ig_url=?, yt_url=?, fb_access_token=?, tw_api_key=?, tw_api_secret=?, li_access_token=?, meta_access_token=? WHERE id=1");
+        $stmt->execute([$name, $tagline, $logo, $whatsapp, $admin_email, $smtp_sender, $smtp_host, $smtp_port, $smtp_user, $smtp_pass, $smtp_encryption, $fb, $tw, $ig, $yt, $fb_token, $tw_key, $tw_secret, $li_token, $meta_token]);
 
         $success = "Settings updated successfully!";
         // Refresh settings

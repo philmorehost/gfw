@@ -28,9 +28,26 @@ function render_admin_layout($content_file, $pdo, $settings, $extra_data = []) {
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
         <style>
             :root { --pitch-dark: #05070a; --electric-red: #ff3e3e; }
-            body { font-family: 'Inter', sans-serif; background-color: var(--pitch-dark); color: #gray-300; }
-            h1, h2, h3, h4, h5, h6, .font-condensed { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; }
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: var(--pitch-dark);
+                color: #d1d5db;
+                text-rendering: optimizeLegibility;
+                -webkit-font-smoothing: antialiased;
+            }
+            h1, h2, h3, h4, h5, h6, .font-condensed {
+                font-family: 'Barlow Condensed', sans-serif;
+                text-transform: uppercase;
+                font-weight: 800;
+                letter-spacing: -0.01em;
+            }
             .text-electric-red { color: var(--electric-red); }
+            .admin-nav-link {
+                transition: all 0.2s ease-in-out;
+            }
+            .admin-nav-link:hover {
+                transform: translateX(4px);
+            }
         </style>
     </head>
     <body class="bg-[#05070a] text-gray-300">
@@ -61,7 +78,7 @@ function render_admin_layout($content_file, $pdo, $settings, $extra_data = []) {
                         <?php foreach ($menuItems as $item): ?>
                             <a
                                 href="<?php echo $item['path']; ?>"
-                                class="flex items-center px-4 py-3 rounded-xl transition-all duration-300 group text-decoration-none <?php echo $active_page === $item['id'] ? 'bg-[#ff3e3e] text-white shadow-[0_0_20px_rgba(255,62,62,0.3)]' : 'hover:bg-white/5 hover:text-white text-gray-400'; ?>"
+                                class="admin-nav-link flex items-center px-4 py-3 rounded-xl group text-decoration-none <?php echo $active_page === $item['id'] ? 'bg-[#ff3e3e] text-white shadow-[0_0_20px_rgba(255,62,62,0.3)]' : 'hover:bg-white/5 hover:text-white text-gray-300'; ?>"
                             >
                                 <svg class="w-5 h-5 mr-3 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<?php echo $item['icon']; ?>" />

@@ -54,12 +54,16 @@ if (empty($matches)) {
         font-family: 'Inter', sans-serif;
         background-color: var(--pitch-dark);
         color: #fff;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
 
       h1, h2, h3, h4, h5, h6, .font-condensed {
         font-family: 'Barlow Condensed', sans-serif;
         text-transform: uppercase;
         letter-spacing: -0.01em;
+        font-weight: 800;
       }
 
       .text-electric-red { color: var(--electric-red); }
@@ -77,6 +81,11 @@ if (empty($matches)) {
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
       .sharp-text { text-shadow: 0 0 1px rgba(255,255,255,0.1); }
+
+      .nav-link {
+        transition: all 0.2s ease-in-out;
+        font-weight: 700 !important;
+      }
 
       /* Bootstrap Overrides */
       .card { background-color: #0a0e17; border: 1px solid rgba(255,255,255,0.05); }
@@ -184,30 +193,30 @@ if (empty($matches)) {
           </div>
 
           <nav class="nav flex-column mb-auto overflow-y-auto no-scrollbar">
-            <a href="/" class="nav-link px-4 py-3 fw-black text-uppercase ls-widest <?php echo $_SERVER['REQUEST_URI'] === '/' ? 'text-electric-red' : 'text-secondary hover-white'; ?>" style="font-size: 11px;">HOME</a>
-            <p class="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-2 px-4 mt-2">Categories</p>
+            <a href="/" class="nav-link px-4 py-3 fw-black text-uppercase ls-widest <?php echo $_SERVER['REQUEST_URI'] === '/' ? 'text-electric-red' : 'text-gray-400 hover-white'; ?>" style="font-size: 12px;">HOME</a>
+            <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 px-4 mt-2">Categories</p>
             <?php
             $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
             $nav_categories = $stmt->fetchAll();
             foreach ($nav_categories as $cat): ?>
               <a
-                href="/category/<?php echo e($cat['slug']); ?>"
-                class="nav-link px-4 py-2 fw-black text-uppercase ls-widest text-secondary hover-white"
-                style="font-size: 10px;"
+                href="/<?php echo e($cat['slug']); ?>"
+                class="nav-link px-4 py-2 fw-black text-uppercase ls-widest text-gray-400 hover-white"
+                style="font-size: 11px;"
               >
                 <?php echo e($cat['name']); ?>
               </a>
             <?php endforeach; ?>
 
-            <p class="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-2 px-4 mt-4">Pages</p>
+            <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 px-4 mt-4">Pages</p>
             <?php
             $stmt = $pdo->query("SELECT * FROM pages ORDER BY title ASC");
             $nav_pages = $stmt->fetchAll();
             foreach ($nav_pages as $page): ?>
               <a
-                href="/page/<?php echo e($page['slug']); ?>"
-                class="nav-link px-4 py-2 fw-black text-uppercase ls-widest text-secondary hover-white"
-                style="font-size: 10px;"
+                href="/<?php echo e($page['slug']); ?>"
+                class="nav-link px-4 py-2 fw-black text-uppercase ls-widest text-gray-400 hover-white"
+                style="font-size: 11px;"
               >
                 <?php echo e($page['title']); ?>
               </a>

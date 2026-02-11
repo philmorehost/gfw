@@ -53,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="text-center mb-5">
-    <h2 className="display-6 font-condensed fw-black italic text-white text-uppercase">Stage 3: Identity Setup</h2>
-    <p className="text-muted text-uppercase fw-bold ls-widest" style="font-size: 10px;">Establishing administrative command and control</p>
+    <h2 class="display-6 font-condensed fw-black italic text-white text-uppercase">Stage 3: Identity Setup</h2>
+    <p class="text-muted text-uppercase fw-bold ls-widest" style="font-size: 10px;">Establishing administrative command and control</p>
 </div>
 
 <?php if ($success): ?>
