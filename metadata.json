@@ -1,0 +1,7 @@
+{
+  "name": "The Global Football Watch",
+  "description": "A comprehensive sports news portal featuring real-time football fixtures, league tables, transfer news, and an advanced admin CMS for content management.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
