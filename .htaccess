@@ -1,12 +1,8 @@
 RewriteEngine On
 
-# Redirect all requests to root index.php unless it's a real file in root
+# Redirect all requests to root index.php unless it's a real file
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
-# If file exists in migrate/ directory, serve it
-RewriteCond %{DOCUMENT_ROOT}/migrate/$1 -f
-RewriteRule ^(.*)$ migrate/$1 [L]
-
-# Otherwise, route to root index.php
+# Route to root index.php
 RewriteRule ^(.*)$ index.php [L,QSA]
