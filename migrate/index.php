@@ -1,36 +1,7 @@
 <?php
 // migrate/index.php
 
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/mail.php';
-require_once __DIR__ . '/includes/api_cache.php';
-
-// Check if config exists for DB connection
-$pdo = null;
-$settings = [
-    'name' => 'The Global Football Watch',
-    'tagline' => 'The World Watches Football Here.',
-    'logo' => 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=200&h=60',
-    'whatsapp_number' => '+1234567890',
-    'admin_email' => 'admin@example.com',
-    'smtp_sender' => 'editorial@theglobalfootballwatch.com'
-];
-
-if (file_exists(__DIR__ . '/config.php')) {
-    try {
-        $pdo = get_db_connection();
-        if ($pdo) {
-            $db_settings = get_site_settings($pdo);
-            if ($db_settings) {
-                $settings = $db_settings;
-            }
-        }
-    } catch (Exception $e) {
-        // DB connection might fail even if config exists
-    }
-}
+require_once __DIR__ . '/includes/bootstrap.php';
 
 // Simple routing logic
 $request_uri = $_SERVER['REQUEST_URI'];
@@ -49,13 +20,7 @@ if ($parts[0] === 'install') {
     exit;
 }
 
-if (!$pdo && $parts[0] !== 'install') {
-    if (file_exists(__DIR__ . '/config.php')) {
-        die("Database connection failed. If you need to re-install, please delete migrate/config.php first.");
-    }
-    header("Location: /install");
-    exit;
-}
+// PDO check is now handled in bootstrap.php
 
 // Admin Routing
 if ($parts[0] === 'admin') {

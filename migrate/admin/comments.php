@@ -1,4 +1,6 @@
 <?php
+
+if (!isset($pdo)) { require_once __DIR__ . '/../includes/bootstrap.php'; }
 // migrate/admin/comments.php
 
 $GLOBALS['admin_page'] = 'comments';

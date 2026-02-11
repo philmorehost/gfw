@@ -1,4 +1,6 @@
 <?php
+
+if (!isset($pdo)) { require_once __DIR__ . '/../includes/bootstrap.php'; }
 // migrate/pages/home.php
 
 $category = isset($category_name) ? $category_name : null;

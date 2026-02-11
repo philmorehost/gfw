@@ -1,6 +1,5 @@
 RewriteEngine On
 
-# Redirect all requests to index.php unless the file exists
+# Redirect all requests to index.php unless it's a real file
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [L,QSA]
