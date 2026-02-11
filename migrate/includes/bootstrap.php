@@ -26,6 +26,9 @@ if (file_exists(__DIR__ . '/../config.php')) {
     try {
         $pdo = get_db_connection();
         if ($pdo) {
+            // Ensure schema is up to date
+            run_migrations($pdo);
+
             $db_settings = get_site_settings($pdo);
             if ($db_settings) {
                 $settings = $db_settings;
