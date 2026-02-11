@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 notify_subscribers_new_post($pdo, $title, $post_url);
 
                 // Autopost to Social Media
-                autopost_to_social($pdo, $title, $post_url);
+                autopost_to_social($pdo, $new_post_id);
             }
             redirect('/admin/posts');
         } elseif (isset($_POST['delete_post'])) {
