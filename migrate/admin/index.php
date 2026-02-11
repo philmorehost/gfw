@@ -11,10 +11,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['save_post'])) {
             $id = $_POST['id'];
             $title = $_POST['title'];
-            $category = $_POST['category'];
+            $category_id = $_POST['category_id'];
             $excerpt = $_POST['excerpt'];
             $content = $_POST['content'];
-            $image = $_POST['image'];
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title), '-'));
+
+            $image = $_POST['image_url'];
+            if (!empty($_FILES['image_file']['name'])) {
+                $uploaded_image = handle_image_upload($_FILES['image_file'], 'assets/uploads/posts/');
+                if ($uploaded_image) {
+                    $image = $uploaded_image;
+                }
+            }
             $date = $_POST['date'] ?: date('Y-m-d');
             $is_top_story = isset($_POST['is_top_story']) ? 1 : 0;
             $meta_title = $_POST['meta_title'];
@@ -22,16 +30,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $meta_keywords = $_POST['meta_keywords'];
 
             if ($id) {
-                $stmt = $pdo->prepare("UPDATE posts SET title=?, category=?, excerpt=?, content=?, image=?, date=?, is_top_story=?, meta_title=?, meta_description=?, meta_keywords=? WHERE id=?");
-                $stmt->execute([$title, $category, $excerpt, $content, $image, $date, $is_top_story, $meta_title, $meta_description, $meta_keywords, $id]);
+                $stmt = $pdo->prepare("UPDATE posts SET title=?, slug=?, category_id=?, excerpt=?, content=?, image=?, date=?, is_top_story=?, meta_title=?, meta_description=?, meta_keywords=? WHERE id=?");
+                $stmt->execute([$title, $slug, $category_id, $excerpt, $content, $image, $date, $is_top_story, $meta_title, $meta_description, $meta_keywords, $id]);
             } else {
-                $stmt = $pdo->prepare("INSERT INTO posts (title, category, excerpt, content, image, date, is_top_story, meta_title, meta_description, meta_keywords, author) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Admin')");
-                $stmt->execute([$title, $category, $excerpt, $content, $image, $date, $is_top_story, $meta_title, $meta_description, $meta_keywords]);
+                $stmt = $pdo->prepare("INSERT INTO posts (title, slug, category_id, excerpt, content, image, date, is_top_story, meta_title, meta_description, meta_keywords, author) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Admin')");
+                $stmt->execute([$title, $slug, $category_id, $excerpt, $content, $image, $date, $is_top_story, $meta_title, $meta_description, $meta_keywords]);
 
                 // Notify subscribers of new post
                 $new_post_id = $pdo->lastInsertId();
                 $post_url = "/post/" . $new_post_id;
                 notify_subscribers_new_post($pdo, $title, $post_url);
+
+                // Autopost to Social Media
+                autopost_to_social($pdo, $title, $post_url);
             }
             redirect('/admin/posts');
         } elseif (isset($_POST['delete_post'])) {
@@ -57,6 +68,7 @@ if (isset($_GET['edit'])) {
 
 $show_form = isset($_GET['add']) || $edit_post;
 
+require_once __DIR__ . '/../includes/image_handler.php';
 require_once __DIR__ . '/../includes/admin_layout.php';
 
 // Internal content file for the layout

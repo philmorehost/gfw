@@ -81,6 +81,10 @@ if (is_admin_logged_in()) {
                     Authenticate
                 </button>
             </form>
+
+            <div class="mt-8 text-center">
+                <a href="/admin/forgot-password" class="text-[10px] font-black text-gray-500 hover:text-white uppercase tracking-widest text-decoration-none">Lost Access Credentials?</a>
+            </div>
         </div>
     </div>
 </body>

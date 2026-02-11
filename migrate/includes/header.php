@@ -1,26 +1,23 @@
 <?php
 // migrate/includes/header.php
 
-// Attempt to fetch real matches if API KEY is available, else use mock
-$api_key = 'YOUR_FOOTBALL_DATA_API_KEY'; // In real app, this would be in settings or config
+// Fetch real matches using FootballApiService
+$api = get_football_api($settings);
 $matches = [];
 
-if ($api_key !== 'YOUR_FOOTBALL_DATA_API_KEY') {
-    $api_url = 'https://api.football-data.org/v4/competitions/PL/matches?status=LIVE,IN_PLAY,FINISHED,SCHEDULED&limit=20';
-    $api_data = fetch_with_cache($api_url, $api_key, 300); // 5 min cache
-    if ($api_data && isset($api_data['matches'])) {
-        foreach ($api_data['matches'] as $m) {
-            $matches[] = [
-                'id' => $m['id'],
-                'homeTeam' => $m['homeTeam']['shortName'] ?: $m['homeTeam']['name'],
-                'awayTeam' => $m['awayTeam']['shortName'] ?: $m['awayTeam']['name'],
-                'time' => date('H:i', strtotime($m['utcDate'])),
-                'league' => 'PL',
-                'status' => $m['status'],
-                'homeScore' => $m['score']['fullTime']['home'],
-                'awayScore' => $m['score']['fullTime']['away']
-            ];
-        }
+$api_fixtures = $api->getFixtures(39, 2024, 10);
+if (!empty($api_fixtures)) {
+    foreach ($api_fixtures as $f) {
+        $matches[] = [
+            'id' => $f['fixture']['id'],
+            'homeTeam' => $f['teams']['home']['name'],
+            'awayTeam' => $f['teams']['away']['name'],
+            'time' => date('H:i', strtotime($f['fixture']['date'])),
+            'league' => $f['league']['name'],
+            'status' => $f['fixture']['status']['short'],
+            'homeScore' => $f['goals']['home'],
+            'awayScore' => $f['goals']['away']
+        ];
     }
 }
 
@@ -173,30 +170,46 @@ if (empty($matches)) {
       <div class="d-flex flex-grow-1">
         <!-- DESKTOP SIDEBAR -->
         <aside class="d-none d-md-flex flex-column bg-dark border-end border-white border-opacity-5" style="width: 240px; position: sticky; top: 120px; height: calc(100vh - 120px);">
-          <div class="p-4 mb-4">
+          <div class="p-4 mb-4 text-center">
             <a href="/" class="text-decoration-none">
-              <h1 class="h2 font-condensed fw-black italic text-white mb-0 lh-1">
-                <span class="text-electric-red">GLOBAL</span><br/>FOOTBALL
-              </h1>
-              <small class="text-uppercase text-muted fw-black ls-wider" style="font-size: 10px;">WATCH</small>
+              <?php if ($settings['logo']): ?>
+                <img src="<?php echo e($settings['logo']); ?>" alt="<?php echo e($settings['name']); ?>" class="img-fluid mb-2">
+              <?php else: ?>
+                <h1 class="h2 font-condensed fw-black italic text-white mb-0 lh-1">
+                  <span class="text-electric-red">GLOBAL</span><br/>FOOTBALL
+                </h1>
+                <small class="text-uppercase text-muted fw-black ls-wider" style="font-size: 10px;">WATCH</small>
+              <?php endif; ?>
             </a>
           </div>
 
-          <nav class="nav flex-column mb-auto">
+          <nav class="nav flex-column mb-auto overflow-y-auto no-scrollbar">
+            <a href="/" class="nav-link px-4 py-3 fw-black text-uppercase ls-widest <?php echo $_SERVER['REQUEST_URI'] === '/' ? 'text-electric-red' : 'text-secondary hover-white'; ?>" style="font-size: 11px;">HOME</a>
+            <p class="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-2 px-4 mt-2">Categories</p>
             <?php
-            $navItems = [
-                ['name' => 'SCORES', 'path' => '/', 'icon' => 'bi-speedometer2'],
-                ['name' => 'WATCH', 'path' => '/watch', 'icon' => 'bi-play-circle'],
-                ['name' => 'BETTING', 'path' => '/betting', 'icon' => 'bi-currency-dollar'],
-                ['name' => 'STORIES', 'path' => '/stories', 'icon' => 'bi-newspaper'],
-            ];
-            foreach ($navItems as $item): ?>
+            $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
+            $nav_categories = $stmt->fetchAll();
+            foreach ($nav_categories as $cat): ?>
               <a
-                href="<?php echo e($item['path']); ?>"
-                class="nav-link px-4 py-3 fw-black text-uppercase ls-widest <?php echo $_SERVER['REQUEST_URI'] === $item['path'] ? 'text-electric-red' : 'text-secondary hover-white'; ?>"
-                style="font-size: 11px;"
+                href="/category/<?php echo e($cat['slug']); ?>"
+                class="nav-link px-4 py-2 fw-black text-uppercase ls-widest text-secondary hover-white"
+                style="font-size: 10px;"
               >
-                <?php echo e($item['name']); ?>
+                <?php echo e($cat['name']); ?>
+              </a>
+            <?php endforeach; ?>
+
+            <p class="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-2 px-4 mt-4">Pages</p>
+            <?php
+            $stmt = $pdo->query("SELECT * FROM pages ORDER BY title ASC");
+            $nav_pages = $stmt->fetchAll();
+            foreach ($nav_pages as $page): ?>
+              <a
+                href="/page/<?php echo e($page['slug']); ?>"
+                class="nav-link px-4 py-2 fw-black text-uppercase ls-widest text-secondary hover-white"
+                style="font-size: 10px;"
+              >
+                <?php echo e($page['title']); ?>
               </a>
             <?php endforeach; ?>
           </nav>

@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Insert Settings
         $pdo->exec("DELETE FROM settings");
-        $stmt = $pdo->prepare("INSERT INTO settings (id, name, tagline, logo, admin_email, smtp_sender, whatsapp_number, fb_url, tw_url, ig_url, yt_url) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO settings (id, name, tagline, logo, admin_email, smtp_sender, whatsapp_number, fb_url, tw_url, ig_url, yt_url, api_key, api_url, api_header) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $site_name,
             $site_tagline,
@@ -38,7 +38,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'https://facebook.com/globalfootballwatch',
             'https://twitter.com/globalfootballwatch',
             'https://instagram.com/globalfootballwatch',
-            'https://youtube.com/globalfootballwatch'
+            'https://youtube.com/globalfootballwatch',
+            '00lee8418970aa40edfd7a4b97cbbb65',
+            'https://v3.football.api-sports.io',
+            'x-apisports-key'
         ]);
 
         $success = true;

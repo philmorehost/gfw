@@ -11,20 +11,33 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body d-flex flex-column">
-          <nav class="nav flex-column mb-auto">
+          <nav class="nav flex-column mb-auto overflow-y-auto no-scrollbar">
+            <a href="/" class="nav-link text-white fw-black text-uppercase py-2">HOME</a>
+            <p class="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-2 px-3 mt-4">Categories</p>
             <?php
-            $navItems = [
-                ['name' => 'SCORES', 'path' => '/'],
-                ['name' => 'WATCH', 'path' => '/watch'],
-                ['name' => 'BETTING', 'path' => '/betting'],
-                ['name' => 'STORIES', 'path' => '/stories'],
-            ];
-            foreach ($navItems as $item): ?>
+            $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
+            $nav_categories = $stmt->fetchAll();
+            foreach ($nav_categories as $cat): ?>
               <a
-                href="<?php echo e($item['path']); ?>"
-                class="nav-link text-white fw-black text-uppercase py-3"
+                href="/category/<?php echo e($cat['slug']); ?>"
+                class="nav-link text-white-50 hover-white fw-bold text-uppercase py-2 px-3"
+                style="font-size: 11px;"
               >
-                <?php echo e($item['name']); ?>
+                <?php echo e($cat['name']); ?>
+              </a>
+            <?php endforeach; ?>
+
+            <p class="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-2 px-3 mt-4">Pages</p>
+            <?php
+            $stmt = $pdo->query("SELECT * FROM pages ORDER BY title ASC");
+            $nav_pages = $stmt->fetchAll();
+            foreach ($nav_pages as $page): ?>
+              <a
+                href="/page/<?php echo e($page['slug']); ?>"
+                class="nav-link text-white-50 hover-white fw-bold text-uppercase py-2 px-3"
+                style="font-size: 11px;"
+              >
+                <?php echo e($page['title']); ?>
               </a>
             <?php endforeach; ?>
           </nav>

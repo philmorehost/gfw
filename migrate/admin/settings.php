@@ -9,7 +9,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (verify_csrf_token($_POST['csrf_token'])) {
         $name = $_POST['name'];
         $tagline = $_POST['tagline'];
-        $logo = $_POST['logo'];
+
+        $logo = $_POST['logo_url'];
+        if (!empty($_FILES['logo_file']['name'])) {
+            $uploaded_logo = handle_image_upload($_FILES['logo_file'], 'assets/logo/');
+            if ($uploaded_logo) {
+                $logo = $uploaded_logo;
+            }
+        }
         $whatsapp = $_POST['whatsapp_number'];
         $admin_email = $_POST['admin_email'];
         $smtp_sender = $_POST['smtp_sender'];
@@ -32,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+require_once __DIR__ . '/../includes/image_handler.php';
 require_once __DIR__ . '/../includes/admin_layout.php';
 $content_file = __DIR__ . '/settings_content.php';
 render_admin_layout($content_file, $pdo, $settings, ['success' => $success ?? '']);

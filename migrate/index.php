@@ -37,12 +37,28 @@ if ($parts[0] === 'admin') {
         exit;
     }
 
+    if ($admin_page === 'forgot-password') {
+        include __DIR__ . '/admin/forgot-password.php';
+        exit;
+    }
+
+    if ($admin_page === 'reset-password') {
+        include __DIR__ . '/admin/reset-password.php';
+        exit;
+    }
+
     require_admin_login();
 
     switch ($admin_page) {
         case 'index':
         case 'posts':
             include __DIR__ . '/admin/index.php';
+            break;
+        case 'categories':
+            include __DIR__ . '/admin/categories.php';
+            break;
+        case 'pages':
+            include __DIR__ . '/admin/pages.php';
             break;
         case 'comments':
             include __DIR__ . '/admin/comments.php';
@@ -70,6 +86,9 @@ if ($path === '' || $path === 'index') {
 } elseif ($parts[0] === 'post' && isset($parts[1])) {
     $post_id = $parts[1];
     include __DIR__ . '/pages/post_detail.php';
+} elseif ($parts[0] === 'page' && isset($parts[1])) {
+    $page_slug = $parts[1];
+    include __DIR__ . '/pages/page.php';
 } elseif ($parts[0] === 'category' && isset($parts[1])) {
     $category_name = $parts[1];
     include __DIR__ . '/pages/home.php';
@@ -80,5 +99,5 @@ if ($path === '' || $path === 'index') {
 } else {
     // 404
     http_response_code(404);
-    echo "<h1>404 - Not Found</h1>";
+    include __DIR__ . '/pages/404.php';
 }

@@ -9,7 +9,7 @@
     <?php endif; ?>
 
     <div class="bg-[#0a0e17] rounded-lg shadow-sm border border-white/10 overflow-hidden">
-        <form method="POST" class="p-8 space-y-6">
+        <form method="POST" class="p-8 space-y-6" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -24,10 +24,16 @@
                     <span class="text-sm font-bold uppercase text-gray-500">Tagline</span>
                     <input type="text" name="tagline" class="mt-1 block w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white" value="<?php echo e($settings['tagline']); ?>">
                 </label>
-                <label class="block">
-                    <span class="text-sm font-bold uppercase text-gray-500">Site Logo URL</span>
-                    <input type="text" name="logo" class="mt-1 block w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white" value="<?php echo e($settings['logo']); ?>">
-                </label>
+                <div class="col-span-full">
+                    <span class="text-sm font-bold uppercase text-gray-500">Site Logo</span>
+                    <div class="mt-2 flex items-center space-x-4">
+                        <?php if ($settings['logo']): ?>
+                            <img src="<?php echo e($settings['logo']); ?>" alt="Logo" class="h-12 bg-gray-800 p-2 rounded">
+                        <?php endif; ?>
+                        <input type="file" name="logo_file" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20">
+                    </div>
+                    <input type="text" name="logo_url" placeholder="Or enter Logo URL" class="mt-2 block w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white text-xs" value="<?php echo e($settings['logo']); ?>">
+                </div>
                 <label class="block">
                     <span class="text-sm font-bold uppercase text-gray-500">WhatsApp Contact</span>
                     <input type="text" name="whatsapp_number" class="mt-1 block w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white" value="<?php echo e($settings['whatsapp_number']); ?>">

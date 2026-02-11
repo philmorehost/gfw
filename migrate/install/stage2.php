@@ -26,12 +26,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
 
+        $pdo->exec("CREATE TABLE IF NOT EXISTS categories (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL UNIQUE,
+            slug VARCHAR(100) NOT NULL UNIQUE,
+            description TEXT
+        )");
+
         $pdo->exec("CREATE TABLE IF NOT EXISTS posts (
             id INT AUTO_INCREMENT PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) NOT NULL UNIQUE,
             excerpt TEXT,
             content LONGTEXT,
-            category VARCHAR(50),
+            category_id INT,
             author VARCHAR(100),
             image VARCHAR(255),
             date DATE,
@@ -42,10 +50,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
 
+        $pdo->exec("CREATE TABLE IF NOT EXISTS pages (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) NOT NULL UNIQUE,
+            content LONGTEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )");
+
         $pdo->exec("CREATE TABLE IF NOT EXISTS comments (
             id INT AUTO_INCREMENT PRIMARY KEY,
             post_id INT,
             author VARCHAR(100),
+            email VARCHAR(255),
             text TEXT,
             status ENUM('pending', 'approved', 'rejected', 'spam') DEFAULT 'pending',
             date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -60,8 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->exec("CREATE TABLE IF NOT EXISTS settings (
             id INT PRIMARY KEY DEFAULT 1,
-            name VARCHAR(255),
-            tagline VARCHAR(255),
+            name VARCHAR(255) DEFAULT 'The Global Football Watch',
+            tagline VARCHAR(255) DEFAULT 'Your Daily Home of Football News, Fixtures & Transfers',
             logo VARCHAR(255),
             admin_email VARCHAR(255),
             smtp_sender VARCHAR(255),
@@ -70,12 +87,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             smtp_user VARCHAR(255),
             smtp_pass VARCHAR(255),
             smtp_encryption VARCHAR(10) DEFAULT 'tls',
+            api_key VARCHAR(255) DEFAULT '00lee8418970aa40edfd7a4b97cbbb65',
+            api_url VARCHAR(255) DEFAULT 'https://v3.football.api-sports.io',
+            api_header VARCHAR(255) DEFAULT 'x-apisports-key',
             whatsapp_number VARCHAR(50),
             fb_url VARCHAR(255),
             tw_url VARCHAR(255),
             ig_url VARCHAR(255),
             yt_url VARCHAR(255)
         )");
+
+        // Add reset token fields to users
+        $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(100) NULL, ADD COLUMN IF NOT EXISTS reset_expires DATETIME NULL");
+
+        // Seed Categories
+        $categories = ['EPL', 'UCL', 'Transfers', 'Chelsea', 'Arsenal', 'Liverpool', 'Man City', 'Fixtures', 'Table', 'Top Scorers'];
+        $stmt = $pdo->prepare("INSERT IGNORE INTO categories (name, slug) VALUES (?, ?)");
+        foreach ($categories as $cat) {
+            $stmt->execute([$cat, strtolower(str_replace(' ', '-', $cat))]);
+        }
 
         // Write config.php safely
         $config_content = "<?php\n";

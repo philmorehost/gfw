@@ -2,40 +2,74 @@
 // migrate/includes/api_cache.php
 
 /**
- * Fetch data from API with file-based caching
+ * Enhanced Football API Service with Caching for API-Sports.io
  */
-function fetch_with_cache($url, $api_key, $cache_time = 3600) {
-    $cache_dir = __DIR__ . '/../cache';
-    if (!is_dir($cache_dir)) {
-        mkdir($cache_dir, 0777, true);
+class FootballApiService {
+    private $api_key;
+    private $base_url;
+    private $header_name;
+    private $cache_dir;
+
+    public function __construct($settings) {
+        $this->api_key = $settings['api_key'] ?? '00lee8418970aa40edfd7a4b97cbbb65';
+        $this->base_url = $settings['api_url'] ?? 'https://v3.football.api-sports.io';
+        $this->header_name = $settings['api_header'] ?? 'x-apisports-key';
+        $this->cache_dir = __DIR__ . '/../cache/api/';
+
+        if (!is_dir($this->cache_dir)) {
+            mkdir($this->cache_dir, 0755, true);
+        }
     }
 
-    $cache_file = $cache_dir . '/' . md5($url) . '.json';
+    private function fetch($endpoint, $params = [], $cache_time = 3600) {
+        $cache_file = $this->cache_dir . md5($endpoint . serialize($params)) . '.json';
 
-    if (file_exists($cache_file) && (time() - filemtime($cache_file) < $cache_time)) {
-        return json_decode(file_get_contents($cache_file), true);
+        if (file_exists($cache_file) && (time() - filemtime($cache_file) < $cache_time)) {
+            return json_decode(file_get_contents($cache_file), true);
+        }
+
+        $url = rtrim($this->base_url, '/') . '/' . ltrim($endpoint, '/');
+        if (!empty($params)) {
+            $url .= '?' . http_build_query($params);
+        }
+
+        $opts = [
+            "http" => [
+                "method" => "GET",
+                "header" => $this->header_name . ": " . $this->api_key . "\r\n"
+            ]
+        ];
+
+        $context = stream_context_create($opts);
+        $response = @file_get_contents($url, false, $context);
+
+        if ($response) {
+            file_put_contents($cache_file, $response);
+            return json_decode($response, true);
+        }
+
+        return null;
     }
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'X-Auth-Token: ' . $api_key
-    ]);
-
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($http_code === 200) {
-        file_put_contents($cache_file, $response);
-        return json_decode($response, true);
+    public function getFixtures($league = 39, $season = 2024, $next = 10) {
+        $data = $this->fetch('fixtures', ['league' => $league, 'season' => $season, 'next' => $next]);
+        return $data['response'] ?? [];
     }
 
-    // If API fails but we have old cache, return it anyway
-    if (file_exists($cache_file)) {
-        return json_decode(file_get_contents($cache_file), true);
+    public function getStandings($league = 39, $season = 2024) {
+        $data = $this->fetch('standings', ['league' => $league, 'season' => $season]);
+        return $data['response'][0]['league']['standings'][0] ?? [];
     }
 
-    return null;
+    public function getTopScorers($league = 39, $season = 2024) {
+        $data = $this->fetch('players/topscorers', ['league' => $league, 'season' => $season]);
+        return $data['response'] ?? [];
+    }
+}
+
+/**
+ * Helper to get the API service
+ */
+function get_football_api($settings) {
+    return new FootballApiService($settings);
 }

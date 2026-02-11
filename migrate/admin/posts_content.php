@@ -13,8 +13,9 @@
     </div>
 
     <?php if ($show_form): ?>
+        <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
         <div class="bg-[#0a0e17] p-8 rounded-2xl border border-white/10 space-y-8">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                 <input type="hidden" name="id" value="<?php echo $edit_post ? $edit_post['id'] : ''; ?>">
 
@@ -28,19 +29,21 @@
                         <div class="grid grid-cols-2 gap-4">
                             <label class="block">
                                 <span class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Category</span>
-                                <select name="category" required class="mt-1 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white">
+                                <select name="category_id" required class="mt-1 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white">
                                     <option value="">Select</option>
                                     <?php
-                                    $categories = ['EPL', 'UCL', 'Transfers', 'Chelsea', 'Arsenal', 'Liverpool', 'Man City'];
-                                    foreach ($categories as $cat): ?>
-                                        <option value="<?php echo $cat; ?>" <?php echo ($edit_post && $edit_post['category'] == $cat) ? 'selected' : ''; ?>><?php echo $cat; ?></option>
+                                    $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
+                                    $all_categories = $stmt->fetchAll();
+                                    foreach ($all_categories as $cat): ?>
+                                        <option value="<?php echo $cat['id']; ?>" <?php echo ($edit_post && $edit_post['category_id'] == $cat['id']) ? 'selected' : ''; ?>><?php echo e($cat['name']); ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </label>
-                            <label class="block">
-                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Image URL</span>
-                                <input type="text" name="image" required class="mt-1 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white" value="<?php echo $edit_post ? e($edit_post['image']) : ''; ?>">
-                            </label>
+                            <div class="block">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Featured Image</span>
+                                <input type="file" name="image_file" class="mt-1 block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20">
+                                <input type="text" name="image_url" placeholder="Or URL" class="mt-1 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-white" value="<?php echo $edit_post ? e($edit_post['image']) : ''; ?>">
+                            </div>
                         </div>
 
                         <div class="bg-white/5 p-6 rounded-2xl border border-white/5 space-y-4">
@@ -58,8 +61,15 @@
                         </label>
                         <label class="block">
                             <span class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Content</span>
-                            <textarea name="content" class="mt-1 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white min-h-[250px]"><?php echo $edit_post ? e($edit_post['content']) : ''; ?></textarea>
+                            <textarea name="content" id="editor" class="mt-1 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white min-h-[400px]"><?php echo $edit_post ? e($edit_post['content']) : ''; ?></textarea>
                         </label>
+                        <script>
+                            ClassicEditor
+                                .create( document.querySelector( '#editor' ) )
+                                .catch( error => {
+                                    console.error( error );
+                                } );
+                        </script>
                         <div class="flex items-center space-x-3">
                             <input type="checkbox" name="is_top_story" id="is_top_story" class="w-4 h-4 rounded border-gray-600 bg-transparent text-[#ff3e3e]" <?php echo ($edit_post && $edit_post['is_top_story']) ? 'checked' : ''; ?>>
                             <label for="is_top_story" class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Top Story</label>
@@ -100,7 +110,12 @@
                                 </div>
                             </td>
                             <td class="px-8 py-6">
-                                <span class="bg-white/5 text-[9px] px-2 py-1 rounded font-black uppercase text-gray-400"><?php echo e($post['category']); ?></span>
+                                <?php
+                                $cstmt = $pdo->prepare("SELECT name FROM categories WHERE id = ?");
+                                $cstmt->execute([$post['category_id']]);
+                                $cname = $cstmt->fetchColumn();
+                                ?>
+                                <span class="bg-white/5 text-[9px] px-2 py-1 rounded font-black uppercase text-gray-400"><?php echo e($cname ?: 'Uncategorized'); ?></span>
                             </td>
                             <td class="px-8 py-6 text-[10px] font-bold text-gray-500 uppercase">
                                 <?php echo $post['date']; ?>

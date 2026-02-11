@@ -1,6 +1,7 @@
 <?php
 
 if (!isset($pdo)) { require_once __DIR__ . '/../includes/bootstrap.php'; }
+require_once __DIR__ . '/../includes/captcha.php';
 // migrate/pages/post_detail.php
 
 $post = null;
@@ -43,19 +44,24 @@ if (!$post) {
 // Handle comment submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
     if (verify_csrf_token($_POST['csrf_token'])) {
-        $author = $_POST['author'];
-        $text = $_POST['text'];
+        if (!verify_captcha($_POST['captcha'] ?? '')) {
+            $comment_error = "Anti-bot protocol failed. Verify math.";
+        } else {
+            $author = $_POST['author'];
+            $email = $_POST['email'];
+            $text = $_POST['text'];
 
-        if ($pdo) {
-            $stmt = $pdo->prepare("INSERT INTO comments (post_id, author, text, status) VALUES (?, ?, ?, 'pending')");
-            $stmt->execute([$post_id, $author, $text]);
+            if ($pdo) {
+                $stmt = $pdo->prepare("INSERT INTO comments (post_id, author, email, text, status) VALUES (?, ?, ?, ?, 'pending')");
+                $stmt->execute([$post_id, $author, $email, $text]);
+            }
+
+            // Notify admin of new comment
+            $admin_email = $settings['admin_email'];
+            send_email($pdo, $admin_email, "New Comment Pending Moderation", "A new comment has been submitted for post: " . $post['title']);
+
+            $comment_submitted = true;
         }
-
-        // Notify admin of new comment
-        $admin_email = $settings['admin_email'];
-        send_email($pdo, $admin_email, "New Comment Pending Moderation", "A new comment has been submitted for post: " . $post['title']);
-
-        $comment_submitted = true;
     }
 }
 
@@ -106,6 +112,11 @@ include __DIR__ . '/../includes/header.php';
                         Comment submitted for moderation.
                     </div>
                 <?php endif; ?>
+                <?php if (isset($comment_error)): ?>
+                    <div class="alert alert-danger rounded-0 font-condensed fw-bold italic text-uppercase mb-5">
+                        <?php echo $comment_error; ?>
+                    </div>
+                <?php endif; ?>
                 <?php if (isset($subscribed)): ?>
                     <div class="alert alert-success rounded-0 font-condensed fw-bold italic text-uppercase mb-5">
                         Subscription confirmed!
@@ -153,11 +164,20 @@ include __DIR__ . '/../includes/header.php';
 
                     <form method="POST" class="card bg-dark bg-opacity-50 p-4 p-md-5 mb-5 border-0">
                         <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-                        <div class="mb-3">
-                            <input required type="text" name="author" placeholder="YOUR NAME" class="form-control bg-dark border-secondary text-white rounded-0 fw-bold">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <input required type="text" name="author" placeholder="YOUR NAME" class="form-control bg-dark border-secondary text-white rounded-0 fw-bold">
+                            </div>
+                            <div class="col-md-6">
+                                <input required type="email" name="email" placeholder="EMAIL ADDRESS" class="form-control bg-dark border-secondary text-white rounded-0 fw-bold">
+                            </div>
                         </div>
                         <div class="mb-3">
                             <textarea required name="text" rows="4" placeholder="JOIN THE DEBATE..." class="form-control bg-dark border-secondary text-white rounded-0 fw-bold"></textarea>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <span class="bg-black px-3 py-2 text-electric-red font-mono me-3 border border-white border-opacity-10 rounded"><?php echo generate_captcha(); ?></span>
+                            <input required type="text" name="captcha" placeholder="ANSWER" class="form-control bg-dark border-secondary text-white rounded-0 fw-bold w-32">
                         </div>
                         <button name="submit_comment" class="btn btn-danger btn-lg rounded-0 fw-black italic text-uppercase py-3">POST RESPONSE</button>
                     </form>

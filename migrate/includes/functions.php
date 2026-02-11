@@ -55,6 +55,17 @@ function redirect($url) {
 }
 
 /**
+ * Social Media Autopost Placeholder
+ */
+function autopost_to_social($pdo, $title, $url) {
+    // In a real implementation, you would use APIs for X/Twitter, Facebook, Instagram, YouTube
+    // This requires OAuth tokens and registered apps.
+    // For now, we log the attempt.
+    $log_msg = "[" . date('Y-m-d H:i:s') . "] Autopost triggered for: $title ($url)\n";
+    file_put_contents(__DIR__ . '/../cache/social_autopost.log', $log_msg, FILE_APPEND);
+}
+
+/**
  * Simple slugify for URLs
  */
 function slugify($text) {
