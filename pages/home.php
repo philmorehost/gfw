@@ -158,6 +158,19 @@ include __DIR__ . '/../includes/header.php';
     <div class="col-lg-4">
         <!-- STANDINGS -->
         <section class="mb-5 bg-dark p-4 rounded-3 border border-white border-opacity-5">
+            <div class="mb-4">
+                <h2 class="h5 font-condensed fw-black italic text-white mb-2 uppercase">Match Intelligence</h2>
+                <div class="moved-ticker-wrapper">
+                    <api-sports-widget
+                        data-type="games"
+                        data-league="<?php echo e($settings['api_league_id'] ?? 39); ?>"
+                        data-season="<?php echo e($settings['api_season'] ?? get_current_season()); ?>"
+                        data-last="5"
+                        data-show-toolbar="false">
+                    </api-sports-widget>
+                </div>
+            </div>
+
             <h2 class="h5 font-condensed fw-black italic text-white mb-4">League Table</h2>
             <div class="api-sports-standings-wrapper">
                 <api-sports-widget

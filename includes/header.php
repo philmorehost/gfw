@@ -177,12 +177,13 @@ $header_standings = $api->getStandings();
             <i class="bi bi-list fs-3"></i>
           </button>
 
-          <div class="header-match-ticker flex-grow-1">
+          <div class="header-match-ticker flex-grow-1 d-flex align-items-center justify-content-center">
             <api-sports-widget
                 data-type="games"
                 data-league="<?php echo e($settings['api_league_id'] ?? 39); ?>"
                 data-season="<?php echo e($settings['api_season'] ?? get_current_season()); ?>"
-                data-last="10"
+                data-last="1"
+                data-refresh="60"
                 data-show-toolbar="false"
                 data-games-style="1">
             </api-sports-widget>
