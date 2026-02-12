@@ -9,6 +9,15 @@ function e($string) {
 }
 
 /**
+ * Get current football season (starting Aug)
+ */
+function get_current_season() {
+    $month = (int)date('m');
+    $year = (int)date('Y');
+    return ($month >= 8) ? $year : ($year - 1);
+}
+
+/**
  * CSRF Protection: Generate token
  */
 function generate_csrf_token() {

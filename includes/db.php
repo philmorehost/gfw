@@ -124,4 +124,9 @@ function run_migrations($pdo) {
     if ($stmt->rowCount() == 0) {
         $pdo->exec("ALTER TABLE settings ADD COLUMN api_host VARCHAR(255) DEFAULT 'api-football-v1.p.rapidapi.com'");
     }
+
+    $stmt = $pdo->query("SHOW COLUMNS FROM settings LIKE 'api_league_id'");
+    if ($stmt->rowCount() == 0) {
+        $pdo->exec("ALTER TABLE settings ADD COLUMN api_league_id INT DEFAULT 39, ADD COLUMN api_season INT NULL");
+    }
 }

@@ -5,7 +5,7 @@
 $api = get_football_api($settings);
 $matches = [];
 
-$api_fixtures = $api->getFixtures(39, 2024, 10);
+$api_fixtures = $api->getFixtures(null, null, 10);
 if (!empty($api_fixtures)) {
     foreach ($api_fixtures as $f) {
         $matches[] = [
@@ -31,7 +31,7 @@ if (empty($matches)) {
 }
 
 // Fetch Standings for Header Ticker
-$header_standings = $api->getStandings(39, 2024);
+$header_standings = $api->getStandings();
 
 ?>
 <!DOCTYPE html>

@@ -16,9 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $api_url = $_POST['api_url'];
             $api_header = $_POST['api_header'];
             $api_host = $_POST['api_host'];
+            $api_league = $_POST['api_league_id'];
+            $api_season = !empty($_POST['api_season']) ? $_POST['api_season'] : null;
 
-            $stmt = $pdo->prepare("UPDATE settings SET api_key=?, api_url=?, api_header=?, api_host=? WHERE id=1");
-            $stmt->execute([$api_key, $api_url, $api_header, $api_host]);
+            $stmt = $pdo->prepare("UPDATE settings SET api_key=?, api_url=?, api_header=?, api_host=?, api_league_id=?, api_season=? WHERE id=1");
+            $stmt->execute([$api_key, $api_url, $api_header, $api_host, $api_league, $api_season]);
 
             $success = "API settings updated successfully.";
             $settings = get_site_settings($pdo);

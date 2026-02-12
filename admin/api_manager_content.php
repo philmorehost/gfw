@@ -40,6 +40,17 @@
                     <input type="text" name="api_host" class="mt-2 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#ff3e3e] focus:ring-0 transition-colors" value="<?php echo e($settings['api_host']); ?>">
                 </label>
 
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="block">
+                        <span class="text-[10px] font-black uppercase text-gray-500 tracking-widest">League ID</span>
+                        <input type="number" name="api_league_id" class="mt-2 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#ff3e3e] focus:ring-0 transition-colors" value="<?php echo e($settings['api_league_id']); ?>">
+                    </label>
+                    <label class="block">
+                        <span class="text-[10px] font-black uppercase text-gray-500 tracking-widest">Season (Override)</span>
+                        <input type="number" name="api_season" placeholder="Auto: <?php echo get_current_season(); ?>" class="mt-2 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#ff3e3e] focus:ring-0 transition-colors" value="<?php echo e($settings['api_season']); ?>">
+                    </label>
+                </div>
+
                 <div class="pt-4">
                     <button type="submit" name="save_api_settings" class="w-full bg-[#ff3e3e] text-white py-4 rounded-xl font-black uppercase italic tracking-widest shadow-xl hover:scale-[1.02] transition-transform">
                         Update Engine

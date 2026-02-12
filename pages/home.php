@@ -32,9 +32,9 @@ $transfer_posts = $stmt->fetchAll();
 
 // API Data
 $api = get_football_api($settings);
-$standings = $api->getStandings(39, 2024);
-$top_scorers = $api->getTopScorers(39, 2024);
-$fixtures = $api->getFixtures(39, 2024, 5);
+$standings = $api->getStandings();
+$top_scorers = $api->getTopScorers();
+$fixtures = $api->getFixtures(null, null, 5);
 
 include __DIR__ . '/../includes/header.php';
 ?>
@@ -144,15 +144,19 @@ include __DIR__ . '/../includes/header.php';
                         </tr>
                     </thead>
                     <tbody style="font-size: 11px;">
-                        <?php foreach (array_slice($standings, 0, 10) as $team): ?>
-                            <tr>
-                                <td class="fw-black text-muted"><?php echo $team['rank']; ?></td>
-                                <td class="fw-bold text-white text-uppercase"><?php echo e($team['team']['name']); ?></td>
-                                <td><?php echo $team['all']['played']; ?></td>
-                                <td><?php echo $team['goalsDiff']; ?></td>
-                                <td class="fw-black text-electric-red"><?php echo $team['points']; ?></td>
-                            </tr>
-                        <?php endforeach; ?>
+                        <?php if (!empty($standings)): ?>
+                            <?php foreach (array_slice($standings, 0, 10) as $team): ?>
+                                <tr>
+                                    <td class="fw-black text-muted"><?php echo $team['rank']; ?></td>
+                                    <td class="fw-bold text-white text-uppercase"><?php echo e($team['team']['name']); ?></td>
+                                    <td><?php echo $team['all']['played']; ?></td>
+                                    <td><?php echo $team['goalsDiff']; ?></td>
+                                    <td class="fw-black text-electric-red"><?php echo $team['points']; ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="5" class="text-center py-4 text-muted uppercase font-bold" style="font-size: 9px;">INTELLIGENCE FEED OFFLINE</td></tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -165,22 +169,26 @@ include __DIR__ . '/../includes/header.php';
         <section class="mb-5 bg-dark p-4 rounded-3 border border-white border-opacity-5">
             <h2 class="h5 font-condensed fw-black italic text-white mb-4">Golden Boot Race</h2>
             <div class="space-y-4">
-                <?php foreach (array_slice($top_scorers, 0, 5) as $index => $player): ?>
-                    <div class="d-flex align-items-center justify-content-between p-2 rounded-2 hover:bg-white/5 transition-colors">
-                        <div class="d-flex align-items-center">
-                            <span class="font-condensed fw-black italic text-muted me-3" style="font-size: 18px;">#<?php echo $index + 1; ?></span>
-                            <img src="<?php echo $player['player']['photo']; ?>" class="w-8 h-8 rounded-circle me-3 border border-white border-opacity-10" alt="">
-                            <div>
-                                <h4 class="font-condensed fw-black text-white italic mb-0" style="font-size: 13px;"><?php echo e($player['player']['name']); ?></h4>
-                                <small class="text-muted text-uppercase fw-bold" style="font-size: 9px;"><?php echo e($player['statistics'][0]['team']['name']); ?></small>
+                <?php if (!empty($top_scorers)): ?>
+                    <?php foreach (array_slice($top_scorers, 0, 5) as $index => $player): ?>
+                        <div class="d-flex align-items-center justify-content-between p-2 rounded-2 hover:bg-white/5 transition-colors">
+                            <div class="d-flex align-items-center">
+                                <span class="font-condensed fw-black italic text-muted me-3" style="font-size: 18px;">#<?php echo $index + 1; ?></span>
+                                <img src="<?php echo $player['player']['photo']; ?>" class="w-8 h-8 rounded-circle me-3 border border-white border-opacity-10" alt="">
+                                <div>
+                                    <h4 class="font-condensed fw-black text-white italic mb-0" style="font-size: 13px;"><?php echo e($player['player']['name']); ?></h4>
+                                    <small class="text-muted text-uppercase fw-bold" style="font-size: 9px;"><?php echo e($player['statistics'][0]['team']['name']); ?></small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="display-6 font-condensed fw-black italic text-electric-red" style="font-size: 20px;"><?php echo $player['statistics'][0]['goals']['total']; ?></span>
+                                <small class="d-block text-muted uppercase fw-bold" style="font-size: 8px;">GOALS</small>
                             </div>
                         </div>
-                        <div class="text-end">
-                            <span class="display-6 font-condensed fw-black italic text-electric-red" style="font-size: 20px;"><?php echo $player['statistics'][0]['goals']['total']; ?></span>
-                            <small class="d-block text-muted uppercase fw-bold" style="font-size: 8px;">GOALS</small>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p class="text-center py-4 text-muted uppercase font-bold" style="font-size: 9px;">DATA UNAVAILABLE</p>
+                <?php endif; ?>
             </div>
         </section>
 
@@ -188,22 +196,26 @@ include __DIR__ . '/../includes/header.php';
         <section class="bg-dark p-4 rounded-3 border border-white border-opacity-5">
             <h2 class="h5 font-condensed fw-black italic text-white mb-4">Upcoming Battles</h2>
             <div class="space-y-3">
-                <?php foreach ($fixtures as $fix): ?>
-                    <div class="p-3 bg-black/40 rounded-3 border border-white border-opacity-5 text-center">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="w-40 text-end">
-                                <span class="d-block font-condensed fw-black text-white italic" style="font-size: 12px;"><?php echo e($fix['teams']['home']['name']); ?></span>
+                <?php if (!empty($fixtures)): ?>
+                    <?php foreach ($fixtures as $fix): ?>
+                        <div class="p-3 bg-black/40 rounded-3 border border-white border-opacity-5 text-center">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="w-40 text-end">
+                                    <span class="d-block font-condensed fw-black text-white italic" style="font-size: 12px;"><?php echo e($fix['teams']['home']['name']); ?></span>
+                                </div>
+                                <div class="bg-electric-red px-2 py-1 rounded-1 font-condensed fw-black italic mx-3" style="font-size: 10px;">VS</div>
+                                <div class="w-40 text-start">
+                                    <span class="d-block font-condensed fw-black text-white italic" style="font-size: 12px;"><?php echo e($fix['teams']['away']['name']); ?></span>
+                                </div>
                             </div>
-                            <div class="bg-electric-red px-2 py-1 rounded-1 font-condensed fw-black italic mx-3" style="font-size: 10px;">VS</div>
-                            <div class="w-40 text-start">
-                                <span class="d-block font-condensed fw-black text-white italic" style="font-size: 12px;"><?php echo e($fix['teams']['away']['name']); ?></span>
+                            <div class="mt-2">
+                                <small class="text-muted font-bold text-uppercase" style="font-size: 9px;"><?php echo date('D d M - H:i', strtotime($fix['fixture']['date'])); ?></small>
                             </div>
                         </div>
-                        <div class="mt-2">
-                            <small class="text-muted font-bold text-uppercase" style="font-size: 9px;"><?php echo date('D d M - H:i', strtotime($fix['fixture']['date'])); ?></small>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p class="text-center py-4 text-muted uppercase font-bold" style="font-size: 9px;">NO UPCOMING FIXTURES</p>
+                <?php endif; ?>
             </div>
         </section>
     </div>
