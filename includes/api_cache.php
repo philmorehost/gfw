@@ -58,11 +58,13 @@ class FootballApiService {
         $curl_error = curl_error($ch);
         curl_close($ch);
 
-        if ($response && $http_code === 200) {
+        $decoded = $response ? json_decode($response, true) : null;
+
+        if ($http_code === 200 && $decoded) {
             if ($cache_time > 0) {
                 file_put_contents($cache_file, $response);
             }
-            return json_decode($response, true);
+            return $decoded;
         }
 
         // Return error details if it's a test or if needed
@@ -71,7 +73,7 @@ class FootballApiService {
                 'error' => true,
                 'http_code' => $http_code,
                 'curl_error' => $curl_error,
-                'response' => $response ? json_decode($response, true) : null
+                'response' => $decoded
             ];
         }
 
@@ -121,27 +123,49 @@ class FootballApiService {
         // Status endpoint is great for testing credentials
         $data = $this->fetch('status', [], 0);
 
+        // Handle API-Sports internal errors (often returned with 200 OK)
+        $api_errors = [];
+        if (isset($data['errors']) && !empty($data['errors'])) {
+            $api_errors = (array)$data['errors'];
+        } elseif (isset($data['response']['errors']) && !empty($data['response']['errors'])) {
+             // Some endpoints might nest errors differently
+            $api_errors = (array)$data['response']['errors'];
+        }
+
+        if (!empty($api_errors)) {
+            $msgs = [];
+            foreach ($api_errors as $k => $v) $msgs[] = (is_string($k) ? "$k: " : "") . $v;
+            return ['success' => false, 'message' => 'API Provider Error: ' . implode(', ', $msgs)];
+        }
+
+        // Handle transport/HTTP errors
         if (isset($data['error']) && $data['error']) {
             $msg = "API Connection Failed (HTTP {$data['http_code']}).";
             if ($data['http_code'] == 401 || $data['http_code'] == 403) {
                 $msg = "Invalid API Key or Access Denied (HTTP {$data['http_code']}).";
             } elseif ($data['http_code'] == 0) {
-                $msg = "Connection Error: " . ($data['curl_error'] ?: "Check API URL");
+                $msg = "Connection Error: " . ($data['curl_error'] ?: "Check API URL and Network");
             }
             return ['success' => false, 'message' => $msg];
         }
 
-        if ($data && isset($data['response']) && !empty($data['response'])) {
-            return [
-                'success' => true,
-                'message' => 'API Connection Successful. Account: ' . ($data['response']['account']['firstname'] ?? 'Active'),
-                'data' => $data['response']
-            ];
+        // Success Case
+        if ($data && isset($data['response']) && !empty($data['response']) && is_array($data['response'])) {
+            // Specifically for status endpoint, response is an object with account info
+            $account = $data['response']['account'] ?? null;
+            if ($account) {
+                return [
+                    'success' => true,
+                    'message' => 'API Connection Successful. Account: ' . ($account['firstname'] ?? 'Active') . ' (' . ($data['response']['subscription']['plan'] ?? 'Default') . ')',
+                    'data' => $data['response']
+                ];
+            }
         }
 
+        // Final fallback if we got here but didn't match success or known error
         return [
             'success' => false,
-            'message' => 'API Connection Failed. Unexpected response format.'
+            'message' => 'API Connection Failed. Response: ' . (is_string($data) ? $data : json_encode($data))
         ];
     }
 }
