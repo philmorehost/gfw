@@ -13,6 +13,23 @@
         </div>
     <?php endif; ?>
 
+    <?php if ($test_result): ?>
+        <div class="alert <?php echo $test_result['success'] ? 'bg-green-600/20 text-green-400' : 'bg-red-600/20 text-red-400'; ?> rounded-0 font-condensed fw-bold italic text-uppercase shadow-lg border-0">
+            <div class="flex items-center gap-3">
+                <i class="bi <?php echo $test_result['success'] ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'; ?> fs-4"></i>
+                <div>
+                    <p class="mb-0"><?php echo $test_result['message']; ?></p>
+                    <?php if ($test_result['success'] && isset($test_result['data']['subscription'])): ?>
+                        <p class="text-[10px] mt-1 opacity-70">
+                            Plan: <?php echo $test_result['data']['subscription']['plan']; ?> |
+                            Requests: <?php echo $test_result['data']['requests']['current']; ?>/<?php echo $test_result['data']['requests']['limit_day']; ?>
+                        </p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
         <!-- API CONFIG -->
         <div class="bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl">
@@ -59,27 +76,32 @@
             </form>
         </div>
 
-        <!-- CACHE MANAGEMENT -->
-        <div class="bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col justify-between">
-            <div>
-                <h3 class="text-xs font-black text-[#ff3e3e] uppercase tracking-widest border-b border-white/5 pb-4 mb-6">Intelligence Cache</h3>
-                <p class="text-gray-400 text-xs leading-relaxed mb-6">
-                    Match fixtures, league tables, and top scorer data are cached locally to optimize performance and reduce API overhead. Clearing the cache will force the system to download fresh intelligence from the feed providers.
-                </p>
-                <div class="p-4 bg-white/5 rounded-2xl border border-white/5 mb-8">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Cache Status</span>
-                        <span class="px-3 py-1 bg-green-600/20 text-green-400 rounded-full text-[9px] font-black uppercase">Active</span>
+        <!-- CACHE & TEST MANAGEMENT -->
+        <div class="space-y-10">
+            <div class="bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col justify-between h-full">
+                <div>
+                    <h3 class="text-xs font-black text-[#ff3e3e] uppercase tracking-widest border-b border-white/5 pb-4 mb-6">Intelligence Cache</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed mb-6">
+                        Match fixtures, league tables, and top scorer data are cached locally to optimize performance and reduce API overhead.
+                    </p>
+                    <div class="p-4 bg-white/5 rounded-2xl border border-white/5 mb-8">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Cache Status</span>
+                            <span class="px-3 py-1 bg-green-600/20 text-green-400 rounded-full text-[9px] font-black uppercase">Active</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <form method="POST">
-                <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-                <button type="submit" name="clear_cache" class="w-full border border-white/10 text-white py-4 rounded-xl font-black uppercase italic tracking-widest hover:bg-white/5 transition-colors">
-                    Flush API Cache
-                </button>
-            </form>
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                    <button type="submit" name="test_api" class="w-full bg-white/5 border border-white/10 text-white py-4 rounded-xl font-black uppercase italic tracking-widest hover:bg-[#ff3e3e] hover:border-[#ff3e3e] transition-all">
+                        Test API Connection
+                    </button>
+                    <button type="submit" name="clear_cache" class="w-full border border-white/10 text-white py-4 rounded-xl font-black uppercase italic tracking-widest hover:bg-white/5 transition-colors">
+                        Flush API Cache
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

@@ -8,6 +8,7 @@ $GLOBALS['admin_page'] = 'api-manager';
 
 $success = '';
 $error = '';
+$test_result = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (verify_csrf_token($_POST['csrf_token'])) {
@@ -31,6 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (is_file($file)) unlink($file);
             }
             $success = "API cache cleared successfully. Fresh data will be fetched on next request.";
+        } elseif (isset($_POST['test_api'])) {
+            $api = get_football_api($settings);
+            $test_result = $api->testConnection();
         }
     }
 }
@@ -38,5 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $content_file = __DIR__ . '/api_manager_content.php';
 render_admin_layout($content_file, $pdo, $settings, [
     'success' => $success,
-    'error' => $error
+    'error' => $error,
+    'test_result' => $test_result
 ]);

@@ -93,6 +93,22 @@ class FootballApiService {
         $data = $this->fetch('players/topscorers', ['league' => $l, 'season' => $s]);
         return $data['response'] ?? [];
     }
+
+    public function testConnection() {
+        // Status endpoint is great for testing credentials without using much quota
+        $data = $this->fetch('status', [], 0); // 0 cache time to force a real test
+        if ($data && isset($data['response']) && !empty($data['response'])) {
+            return [
+                'success' => true,
+                'message' => 'API Connection Successful. Account: ' . ($data['response']['account']['firstname'] ?? 'Active'),
+                'data' => $data['response']
+            ];
+        }
+        return [
+            'success' => false,
+            'message' => 'API Connection Failed. Please check your Key and Host settings.'
+        ];
+    }
 }
 
 /**
