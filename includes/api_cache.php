@@ -8,12 +8,14 @@ class FootballApiService {
     private $api_key;
     private $base_url;
     private $header_name;
+    private $api_host;
     private $cache_dir;
 
     public function __construct($settings) {
         $this->api_key = $settings['api_key'] ?? '00lee8418970aa40edfd7a4b97cbbb65';
         $this->base_url = $settings['api_url'] ?? 'https://v3.football.api-sports.io';
         $this->header_name = $settings['api_header'] ?? 'x-apisports-key';
+        $this->api_host = $settings['api_host'] ?? '';
         $this->cache_dir = __DIR__ . '/../cache/api/';
 
         if (!is_dir($this->cache_dir)) {
@@ -33,10 +35,15 @@ class FootballApiService {
             $url .= '?' . http_build_query($params);
         }
 
+        $headers = $this->header_name . ": " . $this->api_key . "\r\n";
+        if (!empty($this->api_host)) {
+            $headers .= "x-rapidapi-host: " . $this->api_host . "\r\n";
+        }
+
         $opts = [
             "http" => [
                 "method" => "GET",
-                "header" => $this->header_name . ": " . $this->api_key . "\r\n"
+                "header" => $headers
             ]
         ];
 

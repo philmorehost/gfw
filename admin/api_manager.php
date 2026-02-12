@@ -15,9 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $api_key = $_POST['api_key'];
             $api_url = $_POST['api_url'];
             $api_header = $_POST['api_header'];
+            $api_host = $_POST['api_host'];
 
-            $stmt = $pdo->prepare("UPDATE settings SET api_key=?, api_url=?, api_header=? WHERE id=1");
-            $stmt->execute([$api_key, $api_url, $api_header]);
+            $stmt = $pdo->prepare("UPDATE settings SET api_key=?, api_url=?, api_header=?, api_host=? WHERE id=1");
+            $stmt->execute([$api_key, $api_url, $api_header, $api_host]);
 
             $success = "API settings updated successfully.";
             $settings = get_site_settings($pdo);

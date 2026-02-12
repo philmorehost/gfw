@@ -30,6 +30,9 @@ if (empty($matches)) {
     ];
 }
 
+// Fetch Standings for Header Ticker
+$header_standings = $api->getStandings(39, 2024);
+
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -157,6 +160,19 @@ if (empty($matches)) {
         <!-- SECONDARY SPORTS NAV -->
         <div class="bg-dark bg-opacity-50 border-top border-white border-opacity-5 py-2 px-3 overflow-x-auto no-scrollbar">
           <div class="d-flex gap-2">
+            <div class="d-flex align-items-center bg-electric-red px-3 rounded-pill me-2">
+                <span class="text-white fw-black italic text-uppercase" style="font-size: 10px; letter-spacing: 1px;">PL STANDINGS</span>
+            </div>
+            <div class="d-flex align-items-center gap-4 py-1">
+                <?php foreach (array_slice($header_standings, 0, 10) as $team): ?>
+                    <div class="d-flex align-items-center gap-2 text-nowrap">
+                        <span class="text-white-50 fw-bold" style="font-size: 10px;"><?php echo $team['rank']; ?></span>
+                        <span class="text-white fw-black text-uppercase" style="font-size: 10px;"><?php echo e($team['team']['name']); ?></span>
+                        <span class="text-electric-red fw-bold" style="font-size: 10px;"><?php echo $team['points']; ?></span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <div class="border-start border-white border-opacity-10 mx-2"></div>
             <?php
             $sportsFilter = [
                 ['name' => 'NFL', 'icon' => '🏈'],

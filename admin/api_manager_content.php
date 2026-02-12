@@ -35,6 +35,11 @@
                     <input type="text" name="api_header" class="mt-2 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#ff3e3e] focus:ring-0 transition-colors" value="<?php echo e($settings['api_header']); ?>">
                 </label>
 
+                <label class="block">
+                    <span class="text-[10px] font-black uppercase text-gray-500 tracking-widest">RapidAPI Host (Optional)</span>
+                    <input type="text" name="api_host" class="mt-2 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#ff3e3e] focus:ring-0 transition-colors" value="<?php echo e($settings['api_host']); ?>">
+                </label>
+
                 <div class="pt-4">
                     <button type="submit" name="save_api_settings" class="w-full bg-[#ff3e3e] text-white py-4 rounded-xl font-black uppercase italic tracking-widest shadow-xl hover:scale-[1.02] transition-transform">
                         Update Engine

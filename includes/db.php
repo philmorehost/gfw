@@ -119,4 +119,9 @@ function run_migrations($pdo) {
             ADD COLUMN li_access_token TEXT,
             ADD COLUMN meta_access_token TEXT");
     }
+
+    $stmt = $pdo->query("SHOW COLUMNS FROM settings LIKE 'api_host'");
+    if ($stmt->rowCount() == 0) {
+        $pdo->exec("ALTER TABLE settings ADD COLUMN api_host VARCHAR(255) DEFAULT 'api-football-v1.p.rapidapi.com'");
+    }
 }
