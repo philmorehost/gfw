@@ -19,6 +19,7 @@ if ($base_path && strpos($path, $base_path) === 0) {
 }
 
 $path = trim($path, '/');
+$path = rtrim($path, '/');
 $parts = explode('/', $path);
 
 // Check for direct slugs (e.g. domain.com/page-name)

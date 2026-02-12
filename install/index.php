@@ -47,7 +47,7 @@ if ($stage < 1 || $stage > 4) $stage = 1;
             <?php endfor; ?>
         </div>
 
-        <?php include "stage{$stage}.php"; ?>
+        <?php include __DIR__ . "/stage{$stage}.php"; ?>
 
         <div class="text-center mt-5">
             <p class="text-muted text-uppercase fw-bold" style="font-size: 9px;">© <?php echo date('Y'); ?> Global Football Watch | Systems Division</p>
