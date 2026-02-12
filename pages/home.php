@@ -44,37 +44,30 @@ include __DIR__ . '/../includes/header.php';
     <!-- LEFT COLUMN: NEWS -->
     <div class="col-lg-8">
         <!-- LIVE SCORE WIDGET -->
-        <?php if (!empty($live_matches)): ?>
-            <section class="mb-5 bg-electric-red bg-opacity-10 border border-electric-red border-opacity-20 rounded-3 p-4 shadow-xl">
-                <div class="d-flex align-items-center gap-2 mb-4">
+        <section class="mb-5 bg-electric-red bg-opacity-10 border border-electric-red border-opacity-20 rounded-3 p-4 shadow-xl">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center gap-2">
                     <div class="bg-electric-red rounded-circle animate-pulse" style="width: 10px; height: 10px;"></div>
                     <h2 class="h5 font-condensed fw-black italic text-white mb-0 uppercase">Live Operations Intelligence</h2>
                 </div>
-                <div class="row g-4">
-                    <?php foreach ($live_matches as $live): ?>
-                        <div class="col-md-6">
-                            <div class="bg-black bg-opacity-40 rounded-2 p-3 border border-white border-opacity-5">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge bg-electric-red text-[9px] fw-black italic"><?php echo $live['fixture']['status']['elapsed']; ?>'</span>
-                                    <span class="text-white-50 text-[9px] fw-bold uppercase"><?php echo e($live['league']['name']); ?></span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="text-end flex-grow-1">
-                                        <span class="d-block font-condensed fw-black text-white italic text-[13px] uppercase"><?php echo e($live['teams']['home']['name']); ?></span>
-                                    </div>
-                                    <div class="mx-3 bg-white bg-opacity-10 px-3 py-1 rounded font-condensed fw-black text-white italic text-lg">
-                                        <?php echo $live['goals']['home']; ?> - <?php echo $live['goals']['away']; ?>
-                                    </div>
-                                    <div class="text-start flex-grow-1">
-                                        <span class="d-block font-condensed fw-black text-white italic text-[13px] uppercase"><?php echo e($live['teams']['away']['name']); ?></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </section>
-        <?php endif; ?>
+                <span class="text-white-50 text-[10px] fw-black italic uppercase tracking-widest">Realtime Tactical Data</span>
+            </div>
+            <div class="api-sports-livescore-wrapper">
+                <api-sports-widget
+                    data-type="livescore"
+                    data-league="<?php echo e($settings['api_league_id'] ?? 39); ?>"
+                    data-theme="dark"
+                    data-refresh="60"
+                    data-show-errors="false"
+                    data-show-logs="false">
+                </api-sports-widget>
+            </div>
+            <style>
+                .api-sports-livescore-wrapper api-sports-widget {
+                    --api-sports-background-color: transparent;
+                }
+            </style>
+        </section>
 
         <!-- FEATURED SECTION -->
         <section class="mb-5">
@@ -166,37 +159,24 @@ include __DIR__ . '/../includes/header.php';
         <!-- STANDINGS -->
         <section class="mb-5 bg-dark p-4 rounded-3 border border-white border-opacity-5">
             <h2 class="h5 font-condensed fw-black italic text-white mb-4">League Table</h2>
-            <div class="table-responsive">
-                <table class="table table-dark table-sm table-hover border-transparent">
-                    <thead class="text-muted uppercase" style="font-size: 9px;">
-                        <tr>
-                            <th>POS</th>
-                            <th>TEAM</th>
-                            <th>P</th>
-                            <th>GD</th>
-                            <th>PTS</th>
-                        </tr>
-                    </thead>
-                    <tbody style="font-size: 11px;">
-                        <?php if (!empty($standings)): ?>
-                            <?php foreach (array_slice($standings, 0, 10) as $team): ?>
-                                <tr>
-                                    <td class="fw-black text-muted"><?php echo $team['rank']; ?></td>
-                                    <td class="fw-bold text-white text-uppercase"><?php echo e($team['team']['name']); ?></td>
-                                    <td><?php echo $team['all']['played']; ?></td>
-                                    <td><?php echo $team['goalsDiff']; ?></td>
-                                    <td class="fw-black text-electric-red"><?php echo $team['points']; ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr><td colspan="5" class="text-center py-4 text-muted uppercase font-bold" style="font-size: 9px;">INTELLIGENCE FEED OFFLINE</td></tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+            <div class="api-sports-standings-wrapper">
+                <api-sports-widget
+                    data-type="standings"
+                    data-league="<?php echo e($settings['api_league_id'] ?? 39); ?>"
+                    data-season="<?php echo e($settings['api_season'] ?? get_current_season()); ?>"
+                    data-theme="dark"
+                    data-show-errors="false"
+                    data-show-logs="false">
+                </api-sports-widget>
             </div>
-            <div class="text-center mt-3">
-                <button class="btn btn-outline-secondary btn-sm rounded-pill font-condensed fw-black px-4" style="font-size: 10px;">VIEW FULL TABLE</button>
-            </div>
+            <style>
+                .api-sports-standings-wrapper {
+                    font-size: 12px;
+                }
+                .api-sports-standings-wrapper api-sports-widget {
+                    --api-sports-background-color: transparent;
+                }
+            </style>
         </section>
 
         <!-- TOP SCORERS -->

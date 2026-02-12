@@ -77,7 +77,33 @@ $header_standings = $api->getStandings();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- API-Sports Widgets -->
+    <script type="module" src="https://widgets.api-sports.io/3.1.0/widgets.js"></script>
+
+    <api-sports-widget
+        data-type="config"
+        data-key="<?php echo e($settings['api_key']); ?>"
+        data-sport="football"
+        data-theme="dark"
+        data-refresh="60">
+    </api-sports-widget>
+
     <style>
+      .header-match-ticker {
+          width: 100%;
+          background: #000;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+          padding: 0;
+          overflow-x: auto;
+      }
+
+      api-sports-widget {
+          --api-sports-font-family: 'Inter', sans-serif;
+          --api-sports-background-color: transparent;
+          --api-sports-text-color: #ffffff;
+      }
+
       :root {
         --pitch-dark: #05070a;
         --electric-red: #ff3e3e;
@@ -151,46 +177,15 @@ $header_standings = $api->getStandings();
             <i class="bi bi-list fs-3"></i>
           </button>
 
-          <div class="flex-grow-1 d-flex overflow-x-auto no-scrollbar py-1">
-            <?php foreach ($matches as $match): ?>
-              <div class="fixture-card p-3 d-flex flex-column justify-content-between h-100 transition-all cursor-pointer hover:bg-white/5">
-                <div>
-                  <span class="d-block text-uppercase text-secondary fw-black" style="font-size: 9px; letter-spacing: 1px;"><?php echo e($match['league']); ?></span>
-                </div>
-                <div class="my-2">
-                  <div class="d-flex align-items-center justify-content-between mb-1">
-                    <div class="d-flex align-items-center">
-                      <div class="bg-white/5 rounded-1 me-2 d-flex align-items-center justify-content-center" style="width: 20px; height: 20px;">
-                        <img src="<?php echo e($match['homeLogo']); ?>" alt="" style="width: 14px; height: 14px; object-fit: contain;">
-                      </div>
-                      <span class="text-uppercase fw-black text-white text-truncate" style="font-size: 11px; max-width: 80px;"><?php echo e($match['homeTeam']); ?></span>
-                    </div>
-                    <span class="fw-black text-white" style="font-size: 12px;"><?php echo isset($match['homeScore']) ? e($match['homeScore']) : ''; ?></span>
-                  </div>
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
-                      <div class="bg-white/5 rounded-1 me-2 d-flex align-items-center justify-content-center" style="width: 20px; height: 20px;">
-                        <img src="<?php echo e($match['awayLogo']); ?>" alt="" style="width: 14px; height: 14px; object-fit: contain;">
-                      </div>
-                      <span class="text-uppercase fw-black text-white text-truncate" style="font-size: 11px; max-width: 80px;"><?php echo e($match['awayTeam']); ?></span>
-                    </div>
-                    <span class="fw-black text-white" style="font-size: 12px;"><?php echo isset($match['awayScore']) ? e($match['awayScore']) : ''; ?></span>
-                  </div>
-                </div>
-                <div class="pt-2 border-top border-secondary border-opacity-10 d-flex justify-content-between align-items-center">
-                  <span class="text-uppercase <?php echo $match['status'] === 'LIVE' ? 'text-electric-red' : 'text-muted'; ?> fw-bold" style="font-size: 9px;">
-                    <?php if ($match['status'] === 'LIVE'): ?>
-                        <span class="bg-electric-red rounded-circle d-inline-block me-1" style="width: 5px; height: 5px;"></span>
-                    <?php endif; ?>
-                    <?php echo $match['status'] === 'FINISHED' ? 'FINAL' : e($match['time']); ?>
-                  </span>
-                  <span class="badge bg-secondary bg-opacity-10 text-white-50" style="font-size: 8px;">GFW</span>
-                </div>
-              </div>
-            <?php endforeach; ?>
-            <div class="fixture-card p-3 d-flex align-items-center">
-              <button class="btn btn-outline-light btn-sm rounded-pill text-nowrap fw-black" style="font-size: 10px;">ALL SCORES</button>
-            </div>
+          <div class="header-match-ticker flex-grow-1">
+            <api-sports-widget
+                data-type="games"
+                data-league="<?php echo e($settings['api_league_id'] ?? 39); ?>"
+                data-season="<?php echo e($settings['api_season'] ?? get_current_season()); ?>"
+                data-last="10"
+                data-show-toolbar="false"
+                data-games-style="1">
+            </api-sports-widget>
           </div>
         </div>
 
@@ -223,7 +218,7 @@ $header_standings = $api->getStandings();
             foreach ($sportsFilter as $sport): ?>
               <button class="btn btn-sm btn-dark border border-white border-opacity-10 rounded-pill d-flex align-items-center px-3 hover-shadow">
                 <span class="me-2"><?php echo $sport['icon']; ?></span>
-                <span class="fw-black text-uppercase text-secondary" style="font-size: 9px;"><?php echo e($sport['name']); ?></span>
+                <span class="fw-black text-uppercase text-gray-300 hover:text-white transition-colors" style="font-size: 9px;"><?php echo e($sport['name']); ?></span>
               </button>
             <?php endforeach; ?>
           </div>
