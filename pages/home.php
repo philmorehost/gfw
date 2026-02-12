@@ -156,22 +156,25 @@ include __DIR__ . '/../includes/header.php';
 
     <!-- RIGHT COLUMN: STATS & TABLES -->
     <div class="col-lg-4">
-        <!-- STANDINGS -->
+        <!-- STANDINGS & MATCH INTELLIGENCE -->
         <section class="mb-5 bg-dark p-4 rounded-3 border border-white border-opacity-5">
-            <div class="mb-4">
-                <h2 class="h5 font-condensed fw-black italic text-white mb-2 uppercase">Match Intelligence</h2>
-                <div class="moved-ticker-wrapper">
+            <div class="mb-5">
+                <h2 class="h5 font-condensed fw-black italic text-white mb-3 uppercase border-bottom border-electric-red border-2 d-inline-block pb-1">Live Match Intelligence</h2>
+                <div class="moved-ticker-wrapper overflow-x-auto">
                     <api-sports-widget
                         data-type="games"
                         data-league="<?php echo e($settings['api_league_id'] ?? 39); ?>"
                         data-season="<?php echo e($settings['api_season'] ?? get_current_season()); ?>"
-                        data-last="5"
-                        data-show-toolbar="false">
+                        data-last="1"
+                        data-refresh="60"
+                        data-show-toolbar="false"
+                        data-games-style="1">
                     </api-sports-widget>
                 </div>
+                <p class="text-muted mt-2 text-[10px] fw-bold italic">Latest scores auto-rotate based on live match events.</p>
             </div>
 
-            <h2 class="h5 font-condensed fw-black italic text-white mb-4">League Table</h2>
+            <h2 class="h5 font-condensed fw-black italic text-white mb-4 uppercase">League Table</h2>
             <div class="api-sports-standings-wrapper">
                 <api-sports-widget
                     data-type="standings"

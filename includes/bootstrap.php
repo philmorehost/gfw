@@ -20,7 +20,9 @@ $settings = [
     'logo' => 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=200&h=60',
     'whatsapp_number' => '+1234567890',
     'admin_email' => 'admin@example.com',
-    'smtp_sender' => 'editorial@theglobalfootballwatch.com'
+    'smtp_sender' => 'editorial@theglobalfootballwatch.com',
+    'api_key' => '00lee8418970aa40edfd7a4b97cbbb65',
+    'api_league_id' => 39
 ];
 
 if (file_exists(__DIR__ . '/../config.php')) {
@@ -40,13 +42,12 @@ if (file_exists(__DIR__ . '/../config.php')) {
     }
 }
 
+// Instantiate API service
 $api = get_football_api($settings);
 
 // Global check for PDO if we are not in the installer
-if (!$pdo && strpos($_SERVER['REQUEST_URI'], '/install') === false) {
-    if (file_exists(__DIR__ . '/../config.php')) {
-        die("Database connection failed. Please check your database credentials in config.php.");
-    } else {
+if (!$pdo && strpos($_SERVER['REQUEST_URI'] ?? '', '/install') === false) {
+    if (!file_exists(__DIR__ . '/../config.php')) {
         header("Location: /install");
         exit;
     }
