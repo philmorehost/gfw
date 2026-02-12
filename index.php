@@ -90,8 +90,11 @@ if ($parts[0] === 'admin') {
 
     switch ($admin_page) {
         case 'index':
-        case 'posts':
+        case 'dashboard':
             include __DIR__ . '/admin/index.php';
+            break;
+        case 'posts':
+            include __DIR__ . '/admin/posts.php';
             break;
         case 'categories':
             include __DIR__ . '/admin/categories.php';
@@ -110,6 +113,9 @@ if ($parts[0] === 'admin') {
             break;
         case 'profile':
             include __DIR__ . '/admin/profile.php';
+            break;
+        case 'api-manager':
+            include __DIR__ . '/admin/api_manager.php';
             break;
         default:
             include __DIR__ . '/admin/index.php';
