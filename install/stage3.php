@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Insert Settings
         $pdo->exec("DELETE FROM settings");
-        $stmt = $pdo->prepare("INSERT INTO settings (id, name, tagline, logo, admin_email, smtp_sender, whatsapp_number, fb_url, tw_url, ig_url, yt_url, api_key, api_url, api_header) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO settings (id, name, tagline, logo, admin_email, smtp_sender, whatsapp_number, fb_url, tw_url, ig_url, yt_url, api_key, api_url, api_header, smtp_encryption, smtp_port) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'tls', 587)");
         $stmt->execute([
             $site_name,
             $site_tagline,
