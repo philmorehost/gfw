@@ -140,8 +140,8 @@ include __DIR__ . '/../includes/header.php';
                     <p class="lead fw-bold italic text-white mb-5 pb-5 border-bottom border-white border-opacity-10 fs-3 lh-base">
                         "<?php echo e($post['excerpt']); ?>"
                     </p>
-                    <div class="text-gray-300 fs-5" style="white-space: pre-wrap; line-height: 1.8; letter-spacing: 0.01em;">
-                        <?php echo nl2br(e($post['content'])); ?>
+                    <div class="text-gray-300 fs-5 article-content" style="line-height: 1.8; letter-spacing: 0.01em;">
+                        <?php echo $post['content']; // CKEditor content is HTML ?>
                     </div>
                 </article>
 

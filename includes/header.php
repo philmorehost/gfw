@@ -129,6 +129,9 @@ $header_standings = $api->getStandings();
 
       .fixture-card { min-width: 220px; border-right: 1px solid rgba(255,255,255,0.05); }
 
+      .article-content p { margin-bottom: 1.5rem; }
+      .article-content h2, .article-content h3 { margin-top: 2rem; margin-bottom: 1rem; color: #fff; }
+
       .group:hover .transition-transform { transform: scale(1.05); }
       .group-hover-red:hover { color: var(--electric-red) !important; }
     </style>
