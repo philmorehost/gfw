@@ -129,4 +129,10 @@ function run_migrations($pdo) {
     if ($stmt->rowCount() == 0) {
         $pdo->exec("ALTER TABLE settings ADD COLUMN api_league_id INT DEFAULT 39, ADD COLUMN api_season INT NULL");
     }
+
+    // 7. Update Subscribers table
+    $stmt = $pdo->query("SHOW COLUMNS FROM subscribers LIKE 'favorite_team_id'");
+    if ($stmt->rowCount() == 0) {
+        $pdo->exec("ALTER TABLE subscribers ADD COLUMN favorite_team_id INT NULL AFTER email, ADD COLUMN favorite_team_name VARCHAR(255) NULL AFTER favorite_team_id");
+    }
 }

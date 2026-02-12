@@ -128,6 +128,8 @@ if ($parts[0] === 'admin') {
 if ($path === '' || $path === 'index') {
     $page_title = $settings['name'] . " | Elite Coverage";
     include __DIR__ . '/pages/home.php';
+} elseif ($path === 'unsubscribe') {
+    include __DIR__ . '/pages/unsubscribe.php';
 } elseif ($parts[0] === 'post' && isset($parts[1])) {
     $post_id = $parts[1];
     include __DIR__ . '/pages/post_detail.php';

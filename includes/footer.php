@@ -15,31 +15,33 @@
             <a href="/" class="nav-link text-white fw-black text-uppercase py-2">HOME</a>
             <p class="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-2 px-3 mt-4">Categories</p>
             <?php
+            if ($pdo):
             $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
             $nav_categories = $stmt->fetchAll();
             foreach ($nav_categories as $cat): ?>
               <a
                 href="/category/<?php echo e($cat['slug']); ?>"
-                class="nav-link text-white-50 hover-white fw-bold text-uppercase py-2 px-3"
+                class="nav-link text-white hover:text-electric-red fw-bold text-uppercase py-2 px-3"
                 style="font-size: 11px;"
               >
                 <?php echo e($cat['name']); ?>
               </a>
-            <?php endforeach; ?>
+            <?php endforeach; endif; ?>
 
             <p class="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-2 px-3 mt-4">Pages</p>
             <?php
+            if ($pdo):
             $stmt = $pdo->query("SELECT * FROM pages ORDER BY title ASC");
             $nav_pages = $stmt->fetchAll();
             foreach ($nav_pages as $page): ?>
               <a
                 href="/page/<?php echo e($page['slug']); ?>"
-                class="nav-link text-white-50 hover-white fw-bold text-uppercase py-2 px-3"
+                class="nav-link text-white hover:text-electric-red fw-bold text-uppercase py-2 px-3"
                 style="font-size: 11px;"
               >
                 <?php echo e($page['title']); ?>
               </a>
-            <?php endforeach; ?>
+            <?php endforeach; endif; ?>
           </nav>
           <div class="pt-3 border-top border-white border-opacity-5">
             <a href="/admin/login" class="nav-link text-secondary fw-black text-uppercase" style="font-size: 12px;">ADMIN LOGIN</a>

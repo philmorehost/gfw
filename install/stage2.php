@@ -74,6 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->exec("CREATE TABLE IF NOT EXISTS subscribers (
             id INT AUTO_INCREMENT PRIMARY KEY,
             email VARCHAR(255) NOT NULL UNIQUE,
+            favorite_team_id INT NULL,
+            favorite_team_name VARCHAR(255) NULL,
             date_joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
 

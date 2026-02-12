@@ -2,7 +2,9 @@
 // includes/header.php
 
 // Fetch real matches using FootballApiService
-$api = get_football_api($settings);
+if (!isset($api)) {
+    $api = get_football_api($settings);
+}
 $matches = [];
 
 // Try to fetch live fixtures first
@@ -12,7 +14,9 @@ if (!empty($live_api)) {
         $matches[] = [
             'id' => $f['fixture']['id'],
             'homeTeam' => $f['teams']['home']['name'],
+            'homeLogo' => $f['teams']['home']['logo'],
             'awayTeam' => $f['teams']['away']['name'],
+            'awayLogo' => $f['teams']['away']['logo'],
             'time' => $f['fixture']['status']['elapsed'] . "'",
             'league' => $f['league']['name'],
             'status' => 'LIVE',
@@ -34,7 +38,9 @@ if (!empty($api_fixtures)) {
         $matches[] = [
             'id' => $f['fixture']['id'],
             'homeTeam' => $f['teams']['home']['name'],
+            'homeLogo' => $f['teams']['home']['logo'],
             'awayTeam' => $f['teams']['away']['name'],
+            'awayLogo' => $f['teams']['away']['logo'],
             'time' => date('H:i', strtotime($f['fixture']['date'])),
             'league' => $f['league']['name'],
             'status' => $f['fixture']['status']['short'],
@@ -44,12 +50,12 @@ if (!empty($api_fixtures)) {
     }
 }
 
+// If still empty, use fallback with placeholder images
 if (empty($matches)) {
     $matches = [
-        ['id' => 'm1', 'homeTeam' => "Arsenal", 'awayTeam' => "Liverpool", 'time' => "16:30", 'league' => "Premier League", 'status' => 'SCHEDULED'],
-        ['id' => 'm2', 'homeTeam' => "West Ham", 'awayTeam' => "Man Utd", 'time' => "14:00", 'league' => "Premier League", 'homeScore' => 2, 'awayScore' => 1, 'status' => 'FINISHED'],
-        ['id' => 'm3', 'homeTeam' => "Chelsea", 'awayTeam' => "Newcastle", 'time' => "14:00", 'league' => "Premier League", 'status' => 'SCHEDULED'],
-        ['id' => 'm4', 'homeTeam' => "Spurs", 'awayTeam' => "Man City", 'time' => "20:00", 'league' => "Premier League", 'status' => 'SCHEDULED']
+        ['id' => 'm1', 'homeTeam' => "Arsenal", 'homeLogo' => 'https://media.api-sports.io/football/teams/42.png', 'awayTeam' => "Liverpool", 'awayLogo' => 'https://media.api-sports.io/football/teams/40.png', 'time' => "16:30", 'league' => "Premier League", 'status' => 'SCHEDULED'],
+        ['id' => 'm2', 'homeTeam' => "West Ham", 'homeLogo' => 'https://media.api-sports.io/football/teams/48.png', 'awayTeam' => "Man Utd", 'awayLogo' => 'https://media.api-sports.io/football/teams/33.png', 'time' => "14:00", 'league' => "Premier League", 'homeScore' => 2, 'awayScore' => 1, 'status' => 'FINISHED'],
+        ['id' => 'm3', 'homeTeam' => "Chelsea", 'homeLogo' => 'https://media.api-sports.io/football/teams/49.png', 'awayTeam' => "Newcastle", 'awayLogo' => 'https://media.api-sports.io/football/teams/34.png', 'time' => "14:00", 'league' => "Premier League", 'status' => 'SCHEDULED']
     ];
 }
 
@@ -144,28 +150,28 @@ $header_standings = $api->getStandings();
 
           <div class="flex-grow-1 d-flex overflow-x-auto no-scrollbar py-1">
             <?php foreach ($matches as $match): ?>
-              <div class="fixture-card p-3 d-flex flex-column justify-content-between h-100 transition-all cursor-pointer">
+              <div class="fixture-card p-3 d-flex flex-column justify-content-between h-100 transition-all cursor-pointer hover:bg-white/5">
                 <div>
                   <span class="d-block text-uppercase text-secondary fw-black" style="font-size: 9px; letter-spacing: 1px;"><?php echo e($match['league']); ?></span>
                 </div>
                 <div class="my-2">
                   <div class="d-flex align-items-center justify-content-between mb-1">
                     <div class="d-flex align-items-center">
-                      <div class="bg-dark rounded-1 me-2 d-flex align-items-center justify-content-center" style="width: 20px; height: 20px;">
-                        <span class="text-muted fw-bold" style="font-size: 8px;">H</span>
+                      <div class="bg-white/5 rounded-1 me-2 d-flex align-items-center justify-content-center" style="width: 20px; height: 20px;">
+                        <img src="<?php echo e($match['homeLogo']); ?>" alt="" style="width: 14px; height: 14px; object-fit: contain;">
                       </div>
                       <span class="text-uppercase fw-black text-white text-truncate" style="font-size: 11px; max-width: 80px;"><?php echo e($match['homeTeam']); ?></span>
                     </div>
-                    <span class="fw-black text-white"><?php echo isset($match['homeScore']) ? e($match['homeScore']) : ''; ?></span>
+                    <span class="fw-black text-white" style="font-size: 12px;"><?php echo isset($match['homeScore']) ? e($match['homeScore']) : ''; ?></span>
                   </div>
                   <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center">
-                      <div class="bg-dark rounded-1 me-2 d-flex align-items-center justify-content-center" style="width: 20px; height: 20px;">
-                        <span class="text-muted fw-bold" style="font-size: 8px;">A</span>
+                      <div class="bg-white/5 rounded-1 me-2 d-flex align-items-center justify-content-center" style="width: 20px; height: 20px;">
+                        <img src="<?php echo e($match['awayLogo']); ?>" alt="" style="width: 14px; height: 14px; object-fit: contain;">
                       </div>
                       <span class="text-uppercase fw-black text-white text-truncate" style="font-size: 11px; max-width: 80px;"><?php echo e($match['awayTeam']); ?></span>
                     </div>
-                    <span class="fw-black text-white"><?php echo isset($match['awayScore']) ? e($match['awayScore']) : ''; ?></span>
+                    <span class="fw-black text-white" style="font-size: 12px;"><?php echo isset($match['awayScore']) ? e($match['awayScore']) : ''; ?></span>
                   </div>
                 </div>
                 <div class="pt-2 border-top border-secondary border-opacity-10 d-flex justify-content-between align-items-center">
@@ -238,34 +244,36 @@ $header_standings = $api->getStandings();
           </div>
 
           <nav class="nav flex-column mb-auto overflow-y-auto no-scrollbar">
-            <a href="/" class="nav-link px-4 py-3 fw-black text-uppercase ls-widest <?php echo $_SERVER['REQUEST_URI'] === '/' ? 'text-electric-red' : 'text-gray-400 hover-white'; ?>" style="font-size: 12px;">HOME</a>
+            <a href="/" class="nav-link px-4 py-3 fw-black text-uppercase ls-widest <?php echo $_SERVER['REQUEST_URI'] === '/' ? 'text-electric-red' : 'text-gray-200 hover:text-white'; ?>" style="font-size: 12px;">HOME</a>
             <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 px-4 mt-2">Categories</p>
             <?php
+            if ($pdo):
             $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
             $nav_categories = $stmt->fetchAll();
             foreach ($nav_categories as $cat): ?>
               <a
                 href="/<?php echo e($cat['slug']); ?>"
-                class="nav-link px-4 py-2 fw-black text-uppercase ls-widest text-gray-400 hover-white"
+                class="nav-link px-4 py-2 fw-black text-uppercase ls-widest text-gray-200 hover:text-white"
                 style="font-size: 11px;"
               >
                 <?php echo e($cat['name']); ?>
               </a>
-            <?php endforeach; ?>
+            <?php endforeach; endif; ?>
 
             <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 px-4 mt-4">Pages</p>
             <?php
+            if ($pdo):
             $stmt = $pdo->query("SELECT * FROM pages ORDER BY title ASC");
             $nav_pages = $stmt->fetchAll();
             foreach ($nav_pages as $page): ?>
               <a
                 href="/<?php echo e($page['slug']); ?>"
-                class="nav-link px-4 py-2 fw-black text-uppercase ls-widest text-gray-400 hover-white"
+                class="nav-link px-4 py-2 fw-black text-uppercase ls-widest text-gray-200 hover:text-white"
                 style="font-size: 11px;"
               >
                 <?php echo e($page['title']); ?>
               </a>
-            <?php endforeach; ?>
+            <?php endforeach; endif; ?>
           </nav>
 
           <div class="p-4 border-top border-white border-opacity-5">

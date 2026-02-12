@@ -30,7 +30,7 @@ class FootballApiService {
     private function fetch($endpoint, $params = [], $cache_time = 3600) {
         $cache_file = $this->cache_dir . md5($endpoint . serialize($params)) . '.json';
 
-        if (file_exists($cache_file) && (time() - filemtime($cache_file) < $cache_time)) {
+        if ($cache_time > 0 && file_exists($cache_file) && (time() - filemtime($cache_file) < $cache_time)) {
             return json_decode(file_get_contents($cache_file), true);
         }
 
@@ -39,24 +39,40 @@ class FootballApiService {
             $url .= '?' . http_build_query($params);
         }
 
-        $headers = $this->header_name . ": " . $this->api_key . "\r\n";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
+        $headers = [
+            $this->header_name . ": " . $this->api_key
+        ];
         if (!empty($this->api_host)) {
-            $headers .= "x-rapidapi-host: " . $this->api_host . "\r\n";
+            $headers[] = "x-rapidapi-host: " . $this->api_host;
+        }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch);
+        curl_close($ch);
+
+        if ($response && $http_code === 200) {
+            if ($cache_time > 0) {
+                file_put_contents($cache_file, $response);
+            }
+            return json_decode($response, true);
         }
 
-        $opts = [
-            "http" => [
-                "method" => "GET",
-                "header" => $headers
-            ]
-        ];
-
-        $context = stream_context_create($opts);
-        $response = @file_get_contents($url, false, $context);
-
-        if ($response) {
-            file_put_contents($cache_file, $response);
-            return json_decode($response, true);
+        // Return error details if it's a test or if needed
+        if ($cache_time === 0) {
+            return [
+                'error' => true,
+                'http_code' => $http_code,
+                'curl_error' => $curl_error,
+                'response' => $response ? json_decode($response, true) : null
+            ];
         }
 
         return null;
@@ -94,9 +110,27 @@ class FootballApiService {
         return $data['response'] ?? [];
     }
 
+    public function getTeams($league = null, $season = null) {
+        $l = $league ?? $this->default_league;
+        $s = $season ?? $this->default_season;
+        $data = $this->fetch('teams', ['league' => $l, 'season' => $s], 86400 * 7); // Cache teams for 1 week
+        return $data['response'] ?? [];
+    }
+
     public function testConnection() {
-        // Status endpoint is great for testing credentials without using much quota
-        $data = $this->fetch('status', [], 0); // 0 cache time to force a real test
+        // Status endpoint is great for testing credentials
+        $data = $this->fetch('status', [], 0);
+
+        if (isset($data['error']) && $data['error']) {
+            $msg = "API Connection Failed (HTTP {$data['http_code']}).";
+            if ($data['http_code'] == 401 || $data['http_code'] == 403) {
+                $msg = "Invalid API Key or Access Denied (HTTP {$data['http_code']}).";
+            } elseif ($data['http_code'] == 0) {
+                $msg = "Connection Error: " . ($data['curl_error'] ?: "Check API URL");
+            }
+            return ['success' => false, 'message' => $msg];
+        }
+
         if ($data && isset($data['response']) && !empty($data['response'])) {
             return [
                 'success' => true,
@@ -104,9 +138,10 @@ class FootballApiService {
                 'data' => $data['response']
             ];
         }
+
         return [
             'success' => false,
-            'message' => 'API Connection Failed. Please check your Key and Host settings.'
+            'message' => 'API Connection Failed. Unexpected response format.'
         ];
     }
 }

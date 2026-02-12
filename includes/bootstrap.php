@@ -40,6 +40,8 @@ if (file_exists(__DIR__ . '/../config.php')) {
     }
 }
 
+$api = get_football_api($settings);
+
 // Global check for PDO if we are not in the installer
 if (!$pdo && strpos($_SERVER['REQUEST_URI'], '/install') === false) {
     if (file_exists(__DIR__ . '/../config.php')) {

@@ -69,17 +69,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subscribe'])) {
     if (verify_csrf_token($_POST['csrf_token'])) {
         $email = $_POST['email'];
+        $team_info = $_POST['favorite_team'] ?? '';
+        $team_id = null;
+        $team_name = null;
+
+        if (!empty($team_info)) {
+            $parts = explode('|', $team_info);
+            $team_id = $parts[0];
+            $team_name = $parts[1] ?? '';
+        }
+
         if ($pdo) {
-            $stmt = $pdo->prepare("INSERT IGNORE INTO subscribers (email) VALUES (?)");
-            $stmt->execute([$email]);
+            $stmt = $pdo->prepare("INSERT INTO subscribers (email, favorite_team_id, favorite_team_name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE favorite_team_id = ?, favorite_team_name = ?");
+            $stmt->execute([$email, $team_id, $team_name, $team_id, $team_name]);
         }
 
         // Notify admin
-        send_email($pdo, $settings['admin_email'], "New Subscriber", "A new user has subscribed: " . $email);
+        send_email($pdo, $settings['admin_email'], "New Subscriber", "A new user has subscribed: " . $email . ($team_name ? " (Fan of $team_name)" : ""));
 
         $subscribed = true;
     }
 }
+
+// Fetch teams for subscription
+$all_teams = $api->getTeams();
 
 $page_title = $post['title'] . " | " . $settings['name'];
 include __DIR__ . '/../includes/header.php';
@@ -149,8 +162,16 @@ include __DIR__ . '/../includes/header.php';
                     <p class="text-white-50 text-uppercase fw-bold mb-4" style="font-size: 11px;">Get elite reporting sent straight to your inbox.</p>
                     <form method="POST" class="row g-3">
                         <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-                        <div class="col-md-9">
+                        <div class="col-md-5">
                             <input type="email" name="email" required placeholder="SCOUT@FIELD.COM" class="form-control form-control-lg bg-dark border-secondary text-white rounded-0 fw-bold text-uppercase">
+                        </div>
+                        <div class="col-md-4">
+                            <select name="favorite_team" class="form-select form-select-lg bg-dark border-secondary text-white rounded-0 fw-bold text-uppercase">
+                                <option value="">SELECT YOUR TEAM</option>
+                                <?php foreach ($all_teams as $t): ?>
+                                    <option value="<?php echo $t['team']['id'] . '|' . $t['team']['name']; ?>"><?php echo e(strtoupper($t['team']['name'])); ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="col-md-3">
                             <button name="subscribe" class="btn btn-danger btn-lg w-100 rounded-0 fw-black italic text-uppercase">JOIN</button>
