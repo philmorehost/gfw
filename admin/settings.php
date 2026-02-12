@@ -1,6 +1,8 @@
 <?php
 
 if (!isset($pdo)) { require_once __DIR__ . '/../includes/bootstrap.php'; }
+require_once __DIR__ . '/../includes/image_handler.php';
+require_once __DIR__ . '/../includes/admin_layout.php';
 // admin/settings.php
 
 $GLOBALS['admin_page'] = 'settings';
@@ -45,7 +47,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-require_once __DIR__ . '/../includes/image_handler.php';
-require_once __DIR__ . '/../includes/admin_layout.php';
 $content_file = __DIR__ . '/settings_content.php';
 render_admin_layout($content_file, $pdo, $settings, ['success' => $success ?? '']);

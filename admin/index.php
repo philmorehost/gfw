@@ -1,6 +1,8 @@
 <?php
 
 if (!isset($pdo)) { require_once __DIR__ . '/../includes/bootstrap.php'; }
+require_once __DIR__ . '/../includes/image_handler.php';
+require_once __DIR__ . '/../includes/admin_layout.php';
 // admin/index.php
 
 $GLOBALS['admin_page'] = 'posts';
@@ -67,9 +69,6 @@ if (isset($_GET['edit'])) {
 }
 
 $show_form = isset($_GET['add']) || $edit_post;
-
-require_once __DIR__ . '/../includes/image_handler.php';
-require_once __DIR__ . '/../includes/admin_layout.php';
 
 // Internal content file for the layout
 $content_file = __DIR__ . '/posts_content.php';

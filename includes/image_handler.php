@@ -18,6 +18,14 @@ function handle_image_upload($file, $destination_dir = 'assets/uploads/', $max_w
     $filename = uniqid('img_') . '.' . $extension;
     $target_file = $upload_dir . $filename;
 
+    // Handle SVG separately as GD doesn't support it
+    if ($extension === 'svg') {
+        if (move_uploaded_file($file['tmp_name'], $target_file)) {
+            return '/' . $destination_dir . $filename;
+        }
+        return null;
+    }
+
     // Check if it's an image
     $check = getimagesize($file['tmp_name']);
     if ($check === false) {
@@ -32,13 +40,15 @@ function handle_image_upload($file, $destination_dir = 'assets/uploads/', $max_w
             break;
         case 'png':
             $image = imagecreatefrompng($file['tmp_name']);
-            // Convert PNG to JPG for better compression if needed, but here we'll just compress
             imagepalettetotruecolor($image);
             imagealphablending($image, true);
             imagesavealpha($image, true);
             break;
         case 'webp':
             $image = imagecreatefromwebp($file['tmp_name']);
+            break;
+        case 'gif':
+            $image = imagecreatefromgif($file['tmp_name']);
             break;
         default:
             return null;
@@ -77,6 +87,9 @@ function handle_image_upload($file, $destination_dir = 'assets/uploads/', $max_w
             break;
         case 'webp':
             $success = imagewebp($image, $target_file, $quality);
+            break;
+        case 'gif':
+            $success = imagegif($image, $target_file);
             break;
     }
 
