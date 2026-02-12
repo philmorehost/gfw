@@ -5,9 +5,32 @@
 $api = get_football_api($settings);
 $matches = [];
 
+// Try to fetch live fixtures first
+$live_api = $api->getLiveFixtures();
+if (!empty($live_api)) {
+    foreach ($live_api as $f) {
+        $matches[] = [
+            'id' => $f['fixture']['id'],
+            'homeTeam' => $f['teams']['home']['name'],
+            'awayTeam' => $f['teams']['away']['name'],
+            'time' => $f['fixture']['status']['elapsed'] . "'",
+            'league' => $f['league']['name'],
+            'status' => 'LIVE',
+            'homeScore' => $f['goals']['home'],
+            'awayScore' => $f['goals']['away']
+        ];
+    }
+}
+
+// Then fetch upcoming ones to fill the bar
 $api_fixtures = $api->getFixtures(null, null, 10);
 if (!empty($api_fixtures)) {
     foreach ($api_fixtures as $f) {
+        // Avoid duplicates if a live match is also in fixtures
+        $exists = false;
+        foreach ($matches as $m) { if ($m['id'] === $f['fixture']['id']) $exists = true; }
+        if ($exists) continue;
+
         $matches[] = [
             'id' => $f['fixture']['id'],
             'homeTeam' => $f['teams']['home']['name'],
@@ -146,7 +169,12 @@ $header_standings = $api->getStandings();
                   </div>
                 </div>
                 <div class="pt-2 border-top border-secondary border-opacity-10 d-flex justify-content-between align-items-center">
-                  <span class="text-uppercase text-muted fw-bold" style="font-size: 9px;"><?php echo $match['status'] === 'FINISHED' ? 'FINAL' : e($match['time']); ?></span>
+                  <span class="text-uppercase <?php echo $match['status'] === 'LIVE' ? 'text-electric-red' : 'text-muted'; ?> fw-bold" style="font-size: 9px;">
+                    <?php if ($match['status'] === 'LIVE'): ?>
+                        <span class="bg-electric-red rounded-circle d-inline-block me-1" style="width: 5px; height: 5px;"></span>
+                    <?php endif; ?>
+                    <?php echo $match['status'] === 'FINISHED' ? 'FINAL' : e($match['time']); ?>
+                  </span>
                   <span class="badge bg-secondary bg-opacity-10 text-white-50" style="font-size: 8px;">GFW</span>
                 </div>
               </div>

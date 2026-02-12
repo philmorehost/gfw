@@ -62,10 +62,21 @@ class FootballApiService {
         return null;
     }
 
-    public function getFixtures($league = null, $season = null, $next = 10) {
+    public function getFixtures($league = null, $season = null, $next = 10, $date = null) {
         $l = $league ?? $this->default_league;
         $s = $season ?? $this->default_season;
-        $data = $this->fetch('fixtures', ['league' => $l, 'season' => $s, 'next' => $next]);
+        $params = ['league' => $l, 'season' => $s];
+        if ($date) $params['date'] = $date;
+        elseif ($next) $params['next'] = $next;
+
+        $data = $this->fetch('fixtures', $params);
+        return $data['response'] ?? [];
+    }
+
+    public function getLiveFixtures($league = null) {
+        $l = $league ?? $this->default_league;
+        // Live matches don't use cache usually or very short cache
+        $data = $this->fetch('fixtures', ['league' => $l, 'live' => 'all'], 300);
         return $data['response'] ?? [];
     }
 

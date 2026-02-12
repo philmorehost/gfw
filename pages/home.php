@@ -35,6 +35,7 @@ $api = get_football_api($settings);
 $standings = $api->getStandings();
 $top_scorers = $api->getTopScorers();
 $fixtures = $api->getFixtures(null, null, 5);
+$live_matches = $api->getLiveFixtures();
 
 include __DIR__ . '/../includes/header.php';
 ?>
@@ -42,6 +43,39 @@ include __DIR__ . '/../includes/header.php';
 <div class="row g-5">
     <!-- LEFT COLUMN: NEWS -->
     <div class="col-lg-8">
+        <!-- LIVE SCORE WIDGET -->
+        <?php if (!empty($live_matches)): ?>
+            <section class="mb-5 bg-electric-red bg-opacity-10 border border-electric-red border-opacity-20 rounded-3 p-4 shadow-xl">
+                <div class="d-flex align-items-center gap-2 mb-4">
+                    <div class="bg-electric-red rounded-circle animate-pulse" style="width: 10px; height: 10px;"></div>
+                    <h2 class="h5 font-condensed fw-black italic text-white mb-0 uppercase">Live Operations Intelligence</h2>
+                </div>
+                <div class="row g-4">
+                    <?php foreach ($live_matches as $live): ?>
+                        <div class="col-md-6">
+                            <div class="bg-black bg-opacity-40 rounded-2 p-3 border border-white border-opacity-5">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-electric-red text-[9px] fw-black italic"><?php echo $live['fixture']['status']['elapsed']; ?>'</span>
+                                    <span class="text-white-50 text-[9px] fw-bold uppercase"><?php echo e($live['league']['name']); ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-end flex-grow-1">
+                                        <span class="d-block font-condensed fw-black text-white italic text-[13px] uppercase"><?php echo e($live['teams']['home']['name']); ?></span>
+                                    </div>
+                                    <div class="mx-3 bg-white bg-opacity-10 px-3 py-1 rounded font-condensed fw-black text-white italic text-lg">
+                                        <?php echo $live['goals']['home']; ?> - <?php echo $live['goals']['away']; ?>
+                                    </div>
+                                    <div class="text-start flex-grow-1">
+                                        <span class="d-block font-condensed fw-black text-white italic text-[13px] uppercase"><?php echo e($live['teams']['away']['name']); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+        <?php endif; ?>
+
         <!-- FEATURED SECTION -->
         <section class="mb-5">
             <h2 class="h4 font-condensed fw-black italic text-white border-bottom border-electric-red border-4 d-inline-block pb-1 mb-4">Featured Stories</h2>
