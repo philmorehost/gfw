@@ -1,62 +1,103 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
-import { Category, Post } from "../types";
+import { GoogleGenAI, Type, GenerateContentParameters } from "@google/genai";
+import { Category, Post, AIModel } from "../types";
 
-/**
- * Helper to get a realistic soccer image URL based on keywords
- */
 function getSoccerImage(category: Category): string {
   const images: Record<string, string[]> = {
-    [Category.EPL]: [
-      "https://images.unsplash.com/photo-1574629810360-7efbbe195018",
-      "https://images.unsplash.com/photo-1522778119026-d647f0596c20",
-      "https://images.unsplash.com/photo-1517466787929-bc90951d0974"
-    ],
-    [Category.TRANSFERS]: [
-      "https://images.unsplash.com/photo-1551958219-acbc608c6377",
-      "https://images.unsplash.com/photo-1508098682722-e99c43a406b2",
-      "https://images.unsplash.com/photo-1518091043644-c1d4457512c6"
-    ],
-    [Category.UCL]: [
-      "https://images.unsplash.com/photo-1556056504-5c7696c4c28d",
-      "https://images.unsplash.com/photo-1543351611-58f69d7c1781",
-      "https://images.unsplash.com/photo-1624880351055-97c5270979bb"
-    ]
+    [Category.EPL]: ["https://images.unsplash.com/photo-1574629810360-7efbbe195018"],
+    [Category.TRANSFERS]: ["https://images.unsplash.com/photo-1551958219-acbc608c6377"],
+    [Category.UCL]: ["https://images.unsplash.com/photo-1556056504-5c7696c4c28d"],
+    [Category.LALIGA]: ["https://images.unsplash.com/photo-1522778119026-d647f0596c20"]
   };
-
   const pool = images[category] || images[Category.EPL];
   const randomImg = pool[Math.floor(Math.random() * pool.length)];
   return `${randomImg}?auto=format&fit=crop&q=80&w=800`;
 }
 
 /**
- * Fetches real news via Google Search and refines it into a unique article.
- * Uses a two-step process to follow Search Grounding guidelines.
+ * Robust wrapper for Gemini calls.
+ * Specifically handles the "Rpc failed" or "Requested entity was not found" (404)
+ * by retrying without tools, which is a common cause of such errors in restricted environments.
  */
-export async function fetchAndRefineNews(topic: string, category: Category): Promise<Post[]> {
+async function callGemini(params: GenerateContentParameters): Promise<any> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  
   try {
-    // Step 1: Use Google Search to find latest information
-    const searchResponse = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Find the 3 latest and most important news stories about ${topic} in the ${category} category for a football news site. Focus on real-time events.`,
+    return await ai.models.generateContent(params);
+  } catch (error: any) {
+    const errorMsg = error?.message || "";
+    const isInternalError = error?.code === 500 || errorMsg.includes("Rpc failed") || errorMsg.includes("xhr error");
+    const isNotFoundError = error?.code === 404 || errorMsg.includes("Requested entity was not found");
+    const isToolError = errorMsg.includes("grounding") || errorMsg.includes("tool") || isNotFoundError;
+
+    // If we have an error and we were using tools, retry without tools
+    if ((isInternalError || isToolError) && params.config?.tools) {
+      console.warn("Gemini Feature/Tool Error detected (Code: " + (error?.code || 'UNK') + "). Falling back to base model without tools...", error);
+      const fallbackConfig = { ...params.config };
+      delete fallbackConfig.tools; // Strip Google Search tool
+      
+      // Attempt the call again without tools to ensure the user gets a response
+      return await ai.models.generateContent({
+        ...params,
+        config: fallbackConfig
+      });
+    }
+    throw error;
+  }
+}
+
+/**
+ * Fetches real-time sports data with reliable fallbacks.
+ */
+export async function fetchSportsData(
+  type: 'LIVESCORE' | 'STATS' | 'LINEUPS' | 'RESULTS' | 'SCHEDULE' | 'ODDS' | 'PROFILES',
+  competition: string,
+  model: AIModel = 'gemini-3-flash-preview'
+): Promise<string> {
+  const prompt = `Provide the latest ${type.toLowerCase()} for ${competition}. 
+  Context: This is for a professional football news site. 
+  Focus on real-time accuracy and tactical depth. 
+  Format the output nicely in Markdown with bold headers.`;
+
+  try {
+    const response = await callGemini({
+      model,
+      contents: [{ parts: [{ text: prompt }] }],
       config: {
         tools: [{ googleSearch: {} }],
+        temperature: 0.7,
       }
+    });
+
+    const grounding = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    const citations = grounding.map((chunk: any) => chunk.web?.uri).filter(Boolean);
+    
+    let resultText = response.text || "No data returned from AI.";
+    if (citations.length > 0) {
+      const uniqueCitations = Array.from(new Set(citations)) as string[];
+      resultText += "\n\n**VERIFIED SOURCES:**\n" + uniqueCitations.map(url => `- [${new URL(url).hostname}](${url})`).join('\n');
+    }
+    
+    return resultText;
+  } catch (error: any) {
+    console.error(`Final Gemini Failure (${type}):`, error);
+    return `### DATA STREAM INTERRUPTED\nOur AI Scout is currently recalibrating. This usually happens when live grounding tools are unavailable for the requested model. \n\n**Try refreshing or selecting a different data type.**`;
+  }
+}
+
+export async function fetchAndRefineNews(topic: string, category: Category, model: AIModel = 'gemini-3-flash-preview'): Promise<Post[]> {
+  try {
+    const searchResponse = await callGemini({
+      model,
+      contents: [{ parts: [{ text: `Generate 3 distinct, high-impact news headlines and summaries about ${topic} in the ${category} category.` }] }],
+      config: { tools: [{ googleSearch: {} }] }
     });
 
     const searchResults = searchResponse.text;
 
-    // Step 2: Use the search results to generate structured articles in JSON format
-    const refineResponse = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Based on these news results:
-      "${searchResults}"
-      
-      Refine them into 3 unique, high-quality articles for "The Global Football Watch".
-      Category: ${category}.
-      Return as a JSON array of objects with "title", "excerpt", "content", and "author". 
-      Rewrite them as professional, original sports reporting. Do not include external links.`,
+    const refineResponse = await callGemini({
+      model,
+      contents: [{ parts: [{ text: `Based on this data: "${searchResults}", refine it into 3 polished news articles for "The Global Football Watch". Return as a JSON array.` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -82,24 +123,19 @@ export async function fetchAndRefineNews(topic: string, category: Category): Pro
       category,
       date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
       image: getSoccerImage(category),
-      isTopStory: Math.random() > 0.7
+      isTopStory: Math.random() > 0.8
     }));
   } catch (error) {
-    console.error("Gemini News Refinement Error:", error);
+    console.error("Gemini News Refinement Failure:", error);
     return [];
   }
 }
 
-/**
- * Generates a full news article draft based on a title and category.
- */
-export async function generateNewsArticle(title: string, category: Category): Promise<Partial<Post>> {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+export async function generateNewsArticle(title: string, category: Category, model: AIModel = 'gemini-3-flash-preview'): Promise<Partial<Post>> {
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `You are a professional football journalist for "The Global Football Watch". Draft a detailed, expert news article for the headline: "${title}" in the category: "${category}". 
-      Return the response as a JSON object with "excerpt", "content", and "author" fields.`,
+    const response = await callGemini({
+      model,
+      contents: [{ parts: [{ text: `Draft a professional football news article for: "${title}" in category: "${category}". Return JSON.` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -113,56 +149,35 @@ export async function generateNewsArticle(title: string, category: Category): Pr
         }
       }
     });
-
     return JSON.parse(response.text || '{}');
   } catch (error) {
-    console.error("Gemini Article Generation Error:", error);
     return {};
   }
 }
 
-/**
- * Generates an image for a football post.
- * Uses gemini-3-pro-image-preview for high-quality sports photography.
- */
 export async function generatePostImage(prompt: string): Promise<string | null> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-image-preview',
-      contents: { parts: [{ text: `Professional 4k cinematic sports photography, hyper-realistic, action shot of: ${prompt}. Intense lighting, sharp focus.` }] },
-      config: { 
-        imageConfig: { 
-          aspectRatio: "16:9", 
-          imageSize: "1K" 
-        } 
-      },
+      contents: { parts: [{ text: `Hyper-realistic, cinematic stadium photography: ${prompt}` }] },
+      config: { imageConfig: { aspectRatio: "16:9", imageSize: "1K" } },
     });
-    
     const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
     return part ? `data:image/png;base64,${part.inlineData.data}` : null;
   } catch (error) {
-    console.error("Gemini Image Generation Error:", error);
     return null;
   }
 }
 
-/**
- * Provides an elite tactical analysis of football news.
- */
-export async function getAIFootballInsight(query: string): Promise<string> {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+export async function getAIFootballInsight(query: string, model: AIModel = 'gemini-3-flash-preview'): Promise<string> {
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: query,
-      config: { 
-        thinkingConfig: { thinkingBudget: 0 } 
-      }
+    const response = await callGemini({
+      model,
+      contents: [{ parts: [{ text: query }] }],
     });
-    return response.text || "No insights available.";
+    return response.text || "Tactical data currently unavailable.";
   } catch (error) {
-    console.error("Gemini Insight Error:", error);
-    return "Insights are currently unavailable.";
+    return "Insight system offline.";
   }
 }

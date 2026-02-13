@@ -11,13 +11,14 @@ const AdminPosts: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [currentPost, setCurrentPost] = useState<Partial<Post>>({ seo: { metaTitle: '', metaDescription: '', keywords: '' } });
+  const [currentPost, setCurrentPost] = useState<Partial<Post>>({ seo: { metaTitle: '', metaDescription: '', keywords: '' }, tags: [] });
   const [loadingAI, setLoadingAI] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
   const [imagePrompt, setImagePrompt] = useState('');
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [bulkCategory, setBulkCategory] = useState<Category | ''>('');
 
   useEffect(() => {
     const storedPosts = localStorage.getItem('site_posts');
@@ -49,7 +50,6 @@ const AdminPosts: React.FC = () => {
     } else {
       updatedPosts = [postToSave, ...posts];
       
-      // Automation triggers for new post
       const subsStored = localStorage.getItem('subscribers');
       const subs = subsStored ? JSON.parse(subsStored) : [];
       await sendSubscriberNotification(postToSave, subs);
@@ -59,7 +59,7 @@ const AdminPosts: React.FC = () => {
     setPosts(updatedPosts);
     localStorage.setItem('site_posts', JSON.stringify(updatedPosts));
     setIsEditing(false);
-    setCurrentPost({ seo: { metaTitle: '', metaDescription: '', keywords: '' } });
+    setCurrentPost({ seo: { metaTitle: '', metaDescription: '', keywords: '' }, tags: [] });
     setSelectedPosts(new Set());
   };
 
@@ -69,6 +69,17 @@ const AdminPosts: React.FC = () => {
       setPosts(updated);
       localStorage.setItem('site_posts', JSON.stringify(updated));
       setSelectedPosts(new Set());
+    }
+  };
+
+  const handleBulkCategoryUpdate = () => {
+    if (!bulkCategory) return;
+    if (confirm(`Update category to ${bulkCategory} for ${selectedPosts.size} posts?`)) {
+      const updated = posts.map(p => selectedPosts.has(p.id) ? { ...p, category: bulkCategory as Category } : p);
+      setPosts(updated);
+      localStorage.setItem('site_posts', JSON.stringify(updated));
+      setSelectedPosts(new Set());
+      setBulkCategory('');
     }
   };
 
@@ -97,6 +108,21 @@ const AdminPosts: React.FC = () => {
     setLoadingImage(false);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLoadingImage(true);
+      try {
+        const compressed = await compressImage(file);
+        setCurrentPost({ ...currentPost, image: compressed });
+      } catch (err) {
+        alert("Image optimization failed.");
+      } finally {
+        setLoadingImage(false);
+      }
+    }
+  };
+
   const toggleSort = () => {
     setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
   };
@@ -118,7 +144,7 @@ const AdminPosts: React.FC = () => {
         <div className="flex space-x-4">
           <button onClick={handleDeleteAll} className="px-4 py-2 border border-red-500/50 text-red-500 text-[10px] font-black uppercase rounded-xl hover:bg-red-500 hover:text-white transition-all">Delete All</button>
           <button
-            onClick={() => { setCurrentPost({ seo: { metaTitle: '', metaDescription: '', keywords: '' } }); setIsEditing(true); }}
+            onClick={() => { setCurrentPost({ seo: { metaTitle: '', metaDescription: '', keywords: '' }, tags: [] }); setIsEditing(true); }}
             className="bg-[#ff3e3e] text-white px-6 py-2 rounded-xl font-black uppercase italic flex items-center shadow-lg hover:scale-105 transition-transform"
           >
             Compose Post
@@ -143,10 +169,32 @@ const AdminPosts: React.FC = () => {
                     {Object.values(Category).map(cat => <option key={cat} value={cat} className="bg-[#0a0e17]">{cat}</option>)}
                   </select>
                 </label>
-                <div className="flex items-end pb-3">
-                  <button onClick={() => setShowImageDialog(true)} className="w-full bg-white/5 border border-white/10 rounded-xl py-3 text-[10px] font-black uppercase text-white hover:bg-[#ff3e3e]">AI Image Gen</button>
+                <div className="flex items-end gap-2 pb-1">
+                  <button onClick={() => setShowImageDialog(true)} className="flex-1 bg-white/5 border border-white/10 rounded-xl py-3 text-[10px] font-black uppercase text-white hover:bg-[#ff3e3e]">AI Image Gen</button>
+                  <label className="flex-1 bg-white/5 border border-white/10 rounded-xl py-3 text-[10px] font-black uppercase text-white text-center cursor-pointer hover:bg-white/10">
+                    Upload
+                    <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
+                  </label>
                 </div>
               </div>
+
+              {currentPost.image && (
+                <div className="mt-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 block mb-2">Asset Preview</span>
+                  <img src={currentPost.image} className="w-full aspect-video rounded-xl object-cover border border-white/10" alt="Preview" />
+                </div>
+              )}
+
+              <label className="block">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Tags (comma separated)</span>
+                <input 
+                  type="text" 
+                  className="mt-1 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white" 
+                  placeholder="e.g. transfer, epl, arsenal"
+                  value={currentPost.tags?.join(', ') || ''} 
+                  onChange={e => setCurrentPost({ ...currentPost, tags: e.target.value.split(',').map(t => t.trim()).filter(t => t !== '') })} 
+                />
+              </label>
 
               <div className="bg-white/5 p-6 rounded-2xl border border-white/5 space-y-4">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ff3e3e]">SEO Metadata</h3>
@@ -163,7 +211,7 @@ const AdminPosts: React.FC = () => {
               </label>
               <label className="block">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Content</span>
-                <textarea className="mt-1 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white min-h-[250px]" value={currentPost.content || ''} onChange={e => setCurrentPost({ ...currentPost, content: e.target.value })} />
+                <textarea className="mt-1 block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white min-h-[450px]" value={currentPost.content || ''} onChange={e => setCurrentPost({ ...currentPost, content: e.target.value })} />
               </label>
             </div>
           </div>
@@ -176,9 +224,23 @@ const AdminPosts: React.FC = () => {
       ) : (
         <>
           {selectedPosts.size > 0 && (
-            <div className="bg-[#ff3e3e] p-4 rounded-xl flex justify-between items-center text-white mb-4 animate-in slide-in-from-top-4">
+            <div className="bg-[#ff3e3e] p-4 rounded-xl flex flex-col md:flex-row justify-between items-md-center text-white mb-4 animate-in slide-in-from-top-4 gap-4">
               <span className="font-black uppercase text-xs tracking-widest">{selectedPosts.size} Posts Selected</span>
-              <button onClick={handleBulkDelete} className="bg-white text-[#ff3e3e] px-4 py-1 rounded-lg text-[10px] font-black uppercase">Delete Selected</button>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center bg-black/20 rounded-lg px-2">
+                  <span className="text-[10px] font-black uppercase mr-2 opacity-60">Bulk Category:</span>
+                  <select 
+                    className="bg-transparent text-[10px] font-black uppercase border-none focus:ring-0 py-1"
+                    value={bulkCategory}
+                    onChange={(e) => setBulkCategory(e.target.value as Category)}
+                  >
+                    <option value="" className="bg-[#ff3e3e]">Select...</option>
+                    {Object.values(Category).map(cat => <option key={cat} value={cat} className="bg-[#ff3e3e]">{cat}</option>)}
+                  </select>
+                  <button onClick={handleBulkCategoryUpdate} disabled={!bulkCategory} className="ml-2 bg-white text-[#ff3e3e] px-3 py-0.5 rounded text-[10px] font-black uppercase disabled:opacity-50">Apply</button>
+                </div>
+                <button onClick={handleBulkDelete} className="bg-white text-[#ff3e3e] px-4 py-1 rounded-lg text-[10px] font-black uppercase">Delete Selected</button>
+              </div>
             </div>
           )}
           <div className="bg-[#0a0e17] rounded-2xl border border-white/10 overflow-hidden shadow-2xl overflow-x-auto">
@@ -188,9 +250,10 @@ const AdminPosts: React.FC = () => {
                   <th className="px-8 py-4 w-10"></th>
                   <th className="px-8 py-4">Article</th>
                   <th className="px-8 py-4">Category</th>
-                  <th className="px-8 py-4 cursor-pointer hover:text-white transition-colors group" onClick={toggleSort}>
-                    <div className="flex items-center">
-                      Date {sortOrder === 'desc' ? '↓' : '↑'}
+                  <th className="px-8 py-4 cursor-pointer hover:text-white transition-colors group bg-white/5" onClick={toggleSort}>
+                    <div className="flex items-center justify-between">
+                      <span>Date</span>
+                      <span className="text-[#ff3e3e] ml-2">{sortOrder === 'desc' ? '▼' : '▲'}</span>
                     </div>
                   </th>
                   <th className="px-8 py-4">Actions</th>
@@ -209,13 +272,16 @@ const AdminPosts: React.FC = () => {
                           <img src={post.image} className="w-10 h-10 rounded mr-4 object-cover" alt="" />
                           <div>
                             <span className="font-bold text-white uppercase italic text-sm">{post.title}</span>
-                            {pendingCount > 0 && (
-                              <div className="flex items-center mt-1">
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {post.tags?.map(tag => (
+                                <span key={tag} className="text-[8px] bg-white/5 text-gray-500 px-1.5 py-0.5 rounded">#{tag}</span>
+                              ))}
+                              {pendingCount > 0 && (
                                 <span className="bg-yellow-500/20 text-yellow-500 text-[8px] font-black px-1.5 py-0.5 rounded border border-yellow-500/20 uppercase">
                                   {pendingCount} Pending Comment{pendingCount > 1 ? 's' : ''}
                                 </span>
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>

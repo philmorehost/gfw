@@ -1,7 +1,11 @@
 
 export enum Category {
-  EPL = 'EPL',
-  UCL = 'UCL',
+  EPL = 'Premier League',
+  UCL = 'Champions League',
+  UEL = 'Europa League',
+  LALIGA = 'La Liga',
+  SERIEA = 'Serie A',
+  BUNDESLIGA = 'Bundesliga',
   TRANSFERS = 'Transfers',
   CHELSEA = 'Chelsea',
   ARSENAL = 'Arsenal',
@@ -11,6 +15,8 @@ export enum Category {
   TABLE = 'Table',
   SCORERS = 'Top Scorers'
 }
+
+export type AIModel = 'gemini-3-flash-preview' | 'gemini-3-pro-preview' | 'gemini-2.5-flash-lite-latest';
 
 export interface SEOMetadata {
   metaTitle: string;
@@ -29,6 +35,7 @@ export interface Post {
   image: string;
   isTopStory?: boolean;
   seo?: SEOMetadata;
+  tags?: string[];
 }
 
 export interface Match {
@@ -44,27 +51,24 @@ export interface Match {
   league: string;
 }
 
-export interface TableEntry {
-  rank: number;
+export interface Standing {
+  position: number;
   team: string;
-  teamLogo?: string;
   played: number;
-  points: number;
   won: number;
   draw: number;
   lost: number;
+  points: number;
   goalsFor: number;
   goalsAgainst: number;
-  goalDifference: number;
 }
 
-export interface Scorer {
-  rank: number;
-  name: string;
-  team: string;
-  teamLogo?: string;
-  goals: number;
-  playedGames: number;
+export interface Transfer {
+  player: string;
+  from: string;
+  to: string;
+  fee: string;
+  status: 'RUMOUR' | 'OFFICIAL' | 'NEGOTIATION';
 }
 
 export interface SiteSettings {
@@ -80,6 +84,7 @@ export interface SiteSettings {
     pass: string;
   };
   whatsappNumber: string;
+  selectedModel: AIModel;
   socials: {
     facebook: string;
     twitter: string;

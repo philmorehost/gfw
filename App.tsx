@@ -5,6 +5,9 @@ import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import Home from './pages/Home';
 import PostDetail from './pages/PostDetail';
+import Watch from './pages/Watch';
+import Betting from './pages/Betting';
+import Standings from './pages/Standings';
 import AdminPosts from './pages/AdminPosts';
 import AdminSettings from './pages/AdminSettings';
 import AdminComments from './pages/AdminComments';
@@ -20,9 +23,12 @@ const App: React.FC = () => {
         {/* Frontend Routes */}
         <Route path="/" element={<Layout><Home /></Layout>} />
         <Route path="/post/:id" element={<Layout><PostDetail /></Layout>} />
+        <Route path="/watch" element={<Layout><Watch /></Layout>} />
+        <Route path="/betting" element={<Layout><Betting /></Layout>} />
+        <Route path="/tables" element={<Layout><Standings /></Layout>} />
         <Route path="/category/:category" element={<Layout><Home /></Layout>} />
         <Route path="/fixtures" element={<Layout><Home /></Layout>} />
-        <Route path="/tables" element={<Layout><Home /></Layout>} />
+        <Route path="/stories" element={<Layout><Home /></Layout>} />
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLayout><AdminLogin /></AdminLayout>} />

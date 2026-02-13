@@ -1,5 +1,5 @@
 
-import { Category, Post, Match, TableEntry, Scorer, SiteSettings, Subscriber } from './types';
+import { Category, Post, Match, SiteSettings, Subscriber } from './types';
 
 export const ADMIN_CREDENTIALS = {
   email: "admin@example.com",
@@ -13,6 +13,7 @@ export const INITIAL_SETTINGS: SiteSettings = {
   adminEmail: "admin@example.com",
   smtpSender: "editorial@theglobalfootballwatch.com",
   whatsappNumber: "+1234567890",
+  selectedModel: 'gemini-3-flash-preview',
   socials: {
     facebook: "https://facebook.com/globalfootballwatch",
     twitter: "https://twitter.com/globalfootballwatch",
