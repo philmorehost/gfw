@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (login_admin($pdo, $email, $password)) {
             // Notify admin of login
             notify_admin_login($pdo, $email);
-            redirect('/admin/posts');
+            redirect('/admin');
         } else {
             $error = 'Invalid credentials.';
         }
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if (is_admin_logged_in()) {
-    redirect('/admin/posts');
+    redirect('/admin');
 }
 
 ?>

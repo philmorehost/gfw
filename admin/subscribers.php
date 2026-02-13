@@ -1,6 +1,7 @@
 <?php
 
 if (!isset($pdo)) { require_once __DIR__ . '/../includes/bootstrap.php'; }
+require_admin_login();
 // admin/subscribers.php
 
 $GLOBALS['admin_page'] = 'subscribers';

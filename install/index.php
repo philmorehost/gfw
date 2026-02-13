@@ -1,13 +1,13 @@
 <?php
 // install/index.php
 
-// Redirect if already installed
-if (file_exists(__DIR__ . '/../config.php')) {
+$stage = isset($_GET['stage']) ? (int)$_GET['stage'] : 1;
+
+// Redirect if already installed (but allow stages 3 and 4 to finish setup)
+if (file_exists(__DIR__ . '/../config.php') && ($stage < 3)) {
     header("Location: /");
     exit;
 }
-
-$stage = isset($_GET['stage']) ? (int)$_GET['stage'] : 1;
 if ($stage < 1 || $stage > 4) $stage = 1;
 
 ?>
